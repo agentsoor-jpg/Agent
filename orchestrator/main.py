@@ -14,10 +14,16 @@ v3.0 additions:
 import asyncio
 import json
 import os
+import sys
 import time
 import uuid
 from pathlib import Path
 from typing import AsyncGenerator, Dict, List, Optional
+
+# Allow running as `python orchestrator/main.py` (adds workspace root to path)
+_root = str(Path(__file__).resolve().parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
 # Load .env file if present (no-op in production if file is absent)
 try:
