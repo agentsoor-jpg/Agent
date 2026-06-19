@@ -1,52 +1,63 @@
 {
   "workflows": {
     "full-app-generation": {
-      "description": "Bolt scaffolds → Aider edits → Replit tests → OpenHands reviews",
+      "description": "5-phase: Context → Plan → Execute (Bolt scaffold + Aider impl) → Verify → Learn",
+      "phases": ["context", "plan", "execute", "verify", "learn"],
       "steps": [
-        {"agent": "bolt", "action": "scaffold", "timeout": 300, "fallback": "openhands", "max_retries": 2, "validation": "files_created"},
-        {"agent": "aider", "action": "edit", "timeout": 300, "fallback": "openhands", "max_retries": 2, "validation": "files_modified"},
-        {"agent": "replit", "action": "test", "timeout": 300, "fallback": null, "max_retries": 1, "validation": "tests_pass"},
-        {"agent": "openhands", "action": "review", "timeout": 300, "fallback": null, "max_retries": 1, "validation": "review_complete"}
+        {"agent": "openhands", "action": "analyze",  "timeout": 120, "fallback": null,       "max_retries": 2, "validation": "analysis_complete"},
+        {"agent": "bolt",      "action": "scaffold", "timeout": 300, "fallback": "openhands","max_retries": 2, "validation": "files_created"},
+        {"agent": "aider",     "action": "edit",     "timeout": 300, "fallback": "openhands","max_retries": 2, "validation": "files_modified"},
+        {"agent": "replit",    "action": "test",     "timeout": 120, "fallback": null,       "max_retries": 1, "validation": "tests_pass"},
+        {"agent": "openhands", "action": "review",   "timeout": 120, "fallback": null,       "max_retries": 1, "validation": "review_complete"}
       ],
       "on_failure": "heal_and_retry",
-      "max_retries": 2
+      "max_retries": 2,
+      "validation": {"require_tests": true, "require_review": true, "min_files": 3}
     },
     "refactoring": {
-      "description": "OpenHands analyzes → Aider refactors → Replit tests",
+      "description": "5-phase: Context → Plan → Analyze + Refactor → Verify → Learn",
+      "phases": ["context", "plan", "execute", "verify", "learn"],
       "steps": [
-        {"agent": "openhands", "action": "analyze", "timeout": 300, "fallback": null, "max_retries": 2, "validation": "analysis_complete"},
-        {"agent": "aider", "action": "refactor", "timeout": 300, "fallback": "openhands", "max_retries": 2, "validation": "files_modified"},
-        {"agent": "replit", "action": "test", "timeout": 300, "fallback": null, "max_retries": 1, "validation": "tests_pass"}
+        {"agent": "openhands", "action": "analyze",  "timeout": 120, "fallback": null,       "max_retries": 2, "validation": "analysis_complete"},
+        {"agent": "aider",     "action": "refactor", "timeout": 300, "fallback": "openhands","max_retries": 2, "validation": "files_modified"},
+        {"agent": "replit",    "action": "test",     "timeout": 120, "fallback": null,       "max_retries": 1, "validation": "tests_pass"}
       ],
       "on_failure": "heal_and_retry",
-      "max_retries": 2
+      "max_retries": 2,
+      "validation": {"require_tests": true, "require_review": false}
     },
     "bug-fixing": {
-      "description": "OpenHands diagnoses → Aider fixes → Replit verifies",
+      "description": "5-phase: Context → Diagnose → Fix → Verify → Learn",
+      "phases": ["context", "plan", "execute", "verify", "learn"],
       "steps": [
-        {"agent": "openhands", "action": "diagnose", "timeout": 300, "fallback": null, "max_retries": 2, "validation": "diagnosis_complete"},
-        {"agent": "aider", "action": "fix", "timeout": 300, "fallback": "openhands", "max_retries": 3, "validation": "files_modified"},
-        {"agent": "replit", "action": "verify", "timeout": 300, "fallback": null, "max_retries": 1, "validation": "bug_resolved"}
+        {"agent": "openhands", "action": "diagnose", "timeout": 120, "fallback": null,       "max_retries": 2, "validation": "diagnosis_complete"},
+        {"agent": "aider",     "action": "fix",      "timeout": 300, "fallback": "openhands","max_retries": 3, "validation": "files_modified"},
+        {"agent": "replit",    "action": "verify",   "timeout": 120, "fallback": null,       "max_retries": 1, "validation": "bug_resolved"}
       ],
       "on_failure": "heal_and_retry",
-      "max_retries": 3
+      "max_retries": 3,
+      "validation": {"require_tests": false, "require_review": false}
     },
     "prototyping": {
-      "description": "Bolt generates → Replit previews",
+      "description": "5-phase: Context → Plan → Bolt generates → Replit previews → Learn",
+      "phases": ["context", "plan", "execute", "verify", "learn"],
       "steps": [
-        {"agent": "bolt", "action": "generate", "timeout": 120, "fallback": "aider", "max_retries": 1, "validation": "files_created"},
-        {"agent": "replit", "action": "preview", "timeout": 120, "fallback": null, "max_retries": 1, "validation": "preview_running"}
+        {"agent": "bolt",   "action": "generate", "timeout": 120, "fallback": "aider","max_retries": 1, "validation": "files_created"},
+        {"agent": "replit", "action": "preview",  "timeout": 60,  "fallback": null,   "max_retries": 1, "validation": "preview_running"}
       ],
       "on_failure": "skip_and_continue",
-      "max_retries": 1
+      "max_retries": 1,
+      "validation": {"require_tests": false, "require_review": false}
     },
     "code-review": {
-      "description": "OpenHands reviews entire codebase",
+      "description": "5-phase: Context → Deep review → Report → Learn",
+      "phases": ["context", "plan", "execute", "verify", "learn"],
       "steps": [
         {"agent": "openhands", "action": "review", "timeout": 600, "fallback": null, "max_retries": 1, "validation": "review_complete"}
       ],
       "on_failure": "stop",
-      "max_retries": 1
+      "max_retries": 1,
+      "validation": {"require_tests": false, "require_review": true}
     }
   }
 }

@@ -9,6 +9,7 @@ Responsibilities:
   - Fallback chain when an agent fails
   - Async throughout — never blocks
   - Persists state to state/ directory across restarts
+  - SSE event broadcasting via orchestrator.sse_bus
 """
 
 import asyncio
@@ -27,6 +28,7 @@ from orchestrator.policy_engine import PolicyEngine
 from orchestrator.recovery_manager import RecoveryManager
 from orchestrator.resource_engine import ResourceEngine
 from orchestrator.scheduler import Scheduler
+from orchestrator import sse_bus
 
 from agents.openhands.adapter import OpenHandsAdapter
 from agents.aider.adapter import AiderAdapter
@@ -64,7 +66,6 @@ AGENT_CAPABILITIES = {
     },
 }
 
-# ── Complexity thresholds ─────────────────────────────────────
 SIMPLE_TASK_KEYWORDS = {"fix", "rename", "typo", "comment", "format", "lint"}
 COMPLEX_TASK_KEYWORDS = {"architecture", "refactor", "redesign", "migrate", "integrate", "review"}
 
@@ -73,7 +74,7 @@ class FileLock:
     """In-process file ownership tracker."""
 
     def __init__(self):
-        self._locks: Dict[str, str] = {}  # filepath -> agent_id
+        self._locks: Dict[str, str] = {}
 
     def acquire(self, filepath: str, agent_id: str) -> bool:
         if filepath in self._locks and self._locks[filepath] != agent_id:
@@ -136,13 +137,9 @@ class Dispatcher:
         self.task_queue = TaskQueue()
         self._agent_semaphores: Dict[str, asyncio.Semaphore] = {}
 
-        # Load workflow policy
         self.workflow_policy = self._load_json("policies/workflow-policy.json", {"workflows": {}})
-
-        # Load persisted state
         self._restore_state()
 
-        # Init per-agent semaphores from capability limits
         for agent_id, caps in AGENT_CAPABILITIES.items():
             self._agent_semaphores[agent_id] = asyncio.Semaphore(caps["max_concurrent"])
 
@@ -168,7 +165,6 @@ class Dispatcher:
         try:
             if STATE_FILE.exists():
                 data = json.loads(STATE_FILE.read_text())
-                # Mark in-progress workflows as interrupted
                 for wf in data.values():
                     if wf.get("status") == "running":
                         wf["status"] = "interrupted"
@@ -184,17 +180,13 @@ class Dispatcher:
             return "high"
         if any(k in text for k in SIMPLE_TASK_KEYWORDS):
             return "low"
-        word_count = len(text.split())
-        if word_count > 100:
+        if len(text.split()) > 100:
             return "high"
         return "medium"
 
     def _smart_route(self, task_type: str, requirements: str) -> str:
-        """Intelligent routing based on task type and complexity."""
         base_agent = self.router.route(task_type)
         complexity = self._estimate_complexity(requirements)
-
-        # Override rules
         if task_type == "file_editing" and complexity == "low":
             return "aider"
         if task_type in ("debugging", "code_review") or complexity == "high":
@@ -203,19 +195,12 @@ class Dispatcher:
             return "bolt"
         if task_type == "code_execution":
             return "replit"
-
         return base_agent or "openhands"
 
     # ── Context window management ─────────────────────────────
 
     def _trim_context(self, context: dict, agent_id: str) -> dict:
-        """Prevent sending too many tokens to agents with small context windows."""
-        limits = {
-            "openhands": 60000,
-            "aider": 30000,
-            "bolt": 20000,
-            "replit": 10000,
-        }
+        limits = {"openhands": 60000, "aider": 30000, "bolt": 20000, "replit": 10000}
         limit = limits.get(agent_id, 20000)
         ctx_str = json.dumps(context)
         if len(ctx_str) > limit:
@@ -231,6 +216,12 @@ class Dispatcher:
             return {**context, "files": trimmed_files, "_trimmed": True}
         return context
 
+    # ── SSE event helpers ─────────────────────────────────────
+
+    def _emit(self, workflow_id: str, event_type: str, data: dict):
+        """Publish an SSE event for this workflow."""
+        sse_bus.publish(workflow_id, event_type, data)
+
     # ── Single step execution ─────────────────────────────────
 
     async def _execute_step(
@@ -238,6 +229,7 @@ class Dispatcher:
         workflow_id: str,
         step: dict,
         payload: dict,
+        step_index: int = 0,
         attempt: int = 0,
     ) -> dict:
         agent_id = step.get("agent")
@@ -256,10 +248,18 @@ class Dispatcher:
             "workflow_id": workflow_id,
         }
 
+        self._emit(workflow_id, "agent_started", {
+            "agent": agent_id,
+            "action": action,
+            "step": step_index,
+            "task_id": task["id"],
+        })
+
         ctx = await self.context_engine.compile({}, [], {})
         ctx = self._trim_context(ctx, agent_id)
 
         semaphore = self._agent_semaphores.get(agent_id, asyncio.Semaphore(1))
+        start_time = time.time()
 
         async with semaphore:
             try:
@@ -288,19 +288,33 @@ class Dispatcher:
                     "artifacts": [],
                 }
 
+        duration = round(time.time() - start_time, 2)
         step_status = result.get("status", "error")
 
-        # Handle failure with fallback
+        event_type = "agent_completed" if step_status not in ("error", "timeout") else "agent_failed"
+        self._emit(workflow_id, event_type, {
+            "agent": agent_id,
+            "action": action,
+            "step": step_index,
+            "status": step_status,
+            "duration_s": duration,
+            "files": len(result.get("modified_files", [])),
+            "summary": result.get("summary", ""),
+        })
+
+        # Fallback chain
         if step_status in ("error", "timeout", "offline") and attempt < max_retries:
             recovery = await self.recovery_manager.handle_failure(agent_id, task["id"], result.get("error", ""))
 
             if recovery["action"] == "retry" and fallback_agent_id is None:
-                await asyncio.sleep(2 ** attempt)  # exponential backoff
-                return await self._execute_step(workflow_id, step, payload, attempt + 1)
+                self._emit(workflow_id, "step_progress", {"message": f"Retrying {agent_id} (attempt {attempt+2})", "step": step_index})
+                await asyncio.sleep(2 ** attempt)
+                return await self._execute_step(workflow_id, step, payload, step_index, attempt + 1)
 
             if recovery["action"] in ("retry", "fallback") and fallback_agent_id:
+                self._emit(workflow_id, "step_progress", {"message": f"Falling back from {agent_id} to {fallback_agent_id}", "step": step_index})
                 fallback_step = {**step, "agent": fallback_agent_id, "fallback": None}
-                fallback_result = await self._execute_step(workflow_id, fallback_step, payload, 0)
+                fallback_result = await self._execute_step(workflow_id, fallback_step, payload, step_index, 0)
                 fallback_result["_fell_back_from"] = agent_id
                 return fallback_result
 
@@ -308,10 +322,11 @@ class Dispatcher:
 
     # ── Workflow lifecycle ────────────────────────────────────
 
-    async def dispatch_workflow(self, workflow_type: str, payload: dict) -> dict:
+    async def dispatch_workflow(self, workflow_type: str, payload: dict, plan: Optional[dict] = None) -> dict:
         workflow_id = str(uuid.uuid4())
         wf_config = self.workflow_policy.get("workflows", {}).get(workflow_type, {})
         steps: List[dict] = wf_config.get("steps", [])
+        phases = wf_config.get("phases", ["execute"])
 
         record = {
             "id": workflow_id,
@@ -319,7 +334,11 @@ class Dispatcher:
             "status": "running",
             "payload": payload,
             "steps": steps,
+            "phases": phases,
             "results": [],
+            "plan": plan,
+            "verification": None,
+            "memory_stored": False,
             "created_at": time.time(),
             "updated_at": time.time(),
             "complexity": self._estimate_complexity(payload.get("requirements", "")),
@@ -329,13 +348,28 @@ class Dispatcher:
 
         await self.workflow_engine.create(workflow_id, steps)
 
+        # Emit workflow started
+        self._emit(workflow_id, "workflow_started", {
+            "workflow_id": workflow_id,
+            "type": workflow_type,
+            "phases": phases,
+            "steps": len(steps),
+            "complexity": record["complexity"],
+        })
+
         results = []
-        for step in steps:
-            # Validation check defined in policy
-            validation = step.get("validation")
-            result = await self._execute_step(workflow_id, step, payload)
+        for i, step in enumerate(steps):
+            self._emit(workflow_id, "step_progress", {
+                "message": f"Phase {i+1}/{len(steps)}: {step['agent']} → {step['action']}",
+                "step": i,
+                "total": len(steps),
+                "percent": round(i / len(steps) * 100),
+            })
+
+            result = await self._execute_step(workflow_id, step, payload, step_index=i)
             result["action"] = step.get("action")
             result["step_agent"] = step.get("agent")
+            result["step_index"] = i
             results.append(result)
 
             await self.workflow_engine.complete(workflow_id, result)
@@ -344,10 +378,11 @@ class Dispatcher:
             self.active_workflows[workflow_id]["updated_at"] = time.time()
             self._persist_state()
 
-            # Stop chain on hard failure (not just offline)
             if result.get("status") == "error" and wf_config.get("on_failure") == "stop":
                 self.active_workflows[workflow_id]["status"] = "failed"
                 self._persist_state()
+                self._emit(workflow_id, "workflow_failed", {"error": result.get("error", "Step failed"), "step": i})
+                sse_bus.close(workflow_id)
                 return {
                     "success": False,
                     "workflow_id": workflow_id,
@@ -360,6 +395,13 @@ class Dispatcher:
         self.active_workflows[workflow_id]["status"] = "completed"
         self.active_workflows[workflow_id]["updated_at"] = time.time()
         self._persist_state()
+
+        self._emit(workflow_id, "workflow_completed", {
+            "workflow_id": workflow_id,
+            "steps_completed": len(results),
+            "duration_s": round(time.time() - record["created_at"], 2),
+        })
+        sse_bus.close(workflow_id)
 
         return {
             "success": True,
@@ -374,6 +416,12 @@ class Dispatcher:
 
     def get_all_workflows(self) -> list:
         return list(self.active_workflows.values())
+
+    def update_workflow_field(self, workflow_id: str, key: str, value):
+        if workflow_id in self.active_workflows:
+            self.active_workflows[workflow_id][key] = value
+            self.active_workflows[workflow_id]["updated_at"] = time.time()
+            self._persist_state()
 
     # ── Task routing ──────────────────────────────────────────
 
