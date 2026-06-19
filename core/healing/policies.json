@@ -1,0 +1,24 @@
+{
+  "max_restarts": 3,
+  "restart_delay_seconds": 10,
+  "fallback_agent": "openhands",
+  "escalation_threshold": 5,
+  "agents": {
+    "openhands": {
+      "restart_command": "docker-compose restart openhands",
+      "health_endpoint": "http://localhost:3001/health"
+    },
+    "aider": {
+      "restart_command": "docker-compose restart aider",
+      "health_endpoint": "http://localhost:3002/health"
+    },
+    "bolt": {
+      "restart_command": "docker-compose restart bolt",
+      "health_endpoint": "http://localhost:3003/health"
+    },
+    "replit": {
+      "restart_command": "docker-compose restart replit",
+      "health_endpoint": "http://localhost:3004/health"
+    }
+  }
+}

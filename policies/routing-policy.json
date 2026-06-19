@@ -1,0 +1,16 @@
+{
+  "task_routing": {
+    "app_scaffolding": "bolt",
+    "file_editing": "aider",
+    "code_execution": "replit",
+    "autonomous_execution": "openhands",
+    "debugging": "openhands",
+    "code_review": "openhands"
+  },
+  "fallback_chain": {
+    "bolt": ["aider", "openhands"],
+    "aider": ["openhands"],
+    "replit": ["openhands"],
+    "openhands": []
+  }
+}
