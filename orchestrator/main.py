@@ -19,10 +19,30 @@ import uuid
 from pathlib import Path
 from typing import AsyncGenerator, Dict, List, Optional
 
+# Load .env file if present (no-op in production if file is absent)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from pydantic import BaseModel
+
+# ── API keys (read from env; None-safe — never crash on missing keys) ─────────
+OPENAI_API_KEY     = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY  = os.getenv("ANTHROPIC_API_KEY")
+GOOGLE_API_KEY     = os.getenv("GOOGLE_API_KEY")
+DEEPSEEK_API_KEY   = os.getenv("DEEPSEEK_API_KEY")
+GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
+
+# ── Runtime config ─────────────────────────────────────────────────────────────
+REDIS_URL    = os.getenv("REDIS_URL",    "redis://localhost:6379")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///aios.db")
+APP_ENV      = os.getenv("APP_ENV",      "development")
+LOG_LEVEL    = os.getenv("LOG_LEVEL",    "INFO")
 
 from orchestrator.dispatcher import Dispatcher
 from orchestrator import sse_bus
@@ -567,17 +587,35 @@ async def get_locks():
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.environ.get("ORCHESTRATOR_PORT", 8000))
+    port      = int(os.environ.get("ORCHESTRATOR_PORT", 8000))
+    log_level = LOG_LEVEL.lower()
+
+    configured_keys = [k for k, v in {
+        "OPENAI": OPENAI_API_KEY, "ANTHROPIC": ANTHROPIC_API_KEY,
+        "GOOGLE": GOOGLE_API_KEY, "DEEPSEEK": DEEPSEEK_API_KEY,
+        "GROQ": GROQ_API_KEY,
+    }.items() if v]
+
     print(f"""
     ██████╗ AI Engineering OS v3.0
-    ├── Orchestrator: FastAPI on port {port}
+    ├── Environment:  {APP_ENV}
+    ├── Orchestrator: FastAPI on 0.0.0.0:{port}
     ├── Dispatcher:   Async with file locking + SSE
     ├── Memory:       Permanent JSON vector store
     ├── Planning:     Pre-execution plan generator
     ├── Verification: Post-build checker
     ├── Agents:       OpenHands·Aider·Bolt·Replit
-    ├── Dashboard:    http://localhost:{port}/dashboard
-    └── Docs:         http://localhost:{port}/docs
+    ├── API keys:     {', '.join(configured_keys) if configured_keys else 'none configured (agents run in offline mode)'}
+    ├── Database:     {DATABASE_URL}
+    ├── Dashboard:    http://0.0.0.0:{port}/dashboard
+    └── Docs:         http://0.0.0.0:{port}/docs
     """)
 
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+    uvicorn.run(
+        "orchestrator.main:app",
+        host="0.0.0.0",
+        port=port,
+        log_level=log_level,
+        # Reload only in dev so Render prod stays stable
+        reload=(APP_ENV == "development"),
+    )
