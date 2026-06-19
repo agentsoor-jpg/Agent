@@ -1,6 +1,6 @@
 INFO:     Will watch for changes in these directories: ['/workspace/project/Agent']
 INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
-INFO:     Started reloader process [2214] using StatReload
+INFO:     Started reloader process [3366] using StatReload
 
     ██████╗ AI Engineering OS v7.0
     ├── Version:        7.0.0
@@ -18,13 +18,11 @@ INFO:     Started reloader process [2214] using StatReload
     ├── Metrics:        http://0.0.0.0:8080/api/v1/metrics
     └── v7.0 Modules:   Loaded
     
-INFO:     Started server process [2217]
+INFO:     Started server process [3369]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:38764 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38778 - "GET /api/v1/health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38782 - "GET /api/v1/metrics HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45322 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45334 - "GET /workflows HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58368 - "GET /dashboard HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58374 - "GET /dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50184 - "POST /cost/estimate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50188 - "POST /templates/apply HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46904 - "GET /dependencies/test-fastapi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46908 - "GET /rollback/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38704 - "GET /dashboard HTTP/1.1" 200 OK

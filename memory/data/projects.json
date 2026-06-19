@@ -50,5 +50,31 @@
     "complexity": "complex",
     "created_at": 1781877236.9429653,
     "updated_at": 1781877236.9429653
+  },
+  "8c8e2163-679c-479a-a8a1-8ea6cf767aaf": {
+    "id": "8c8e2163-679c-479a-a8a1-8ea6cf767aaf",
+    "name": "Workflow: full-app-generation",
+    "description": "Build a simple REST API for a todo list with FastAPI",
+    "architecture": "{\"name\": \"project\", \"children\": [{\"name\": \"backend\", \"tech\": \"fastapi\", \"children\": [{\"name\": \"api\", \"type\": \"feature\"}, {\"name\": \"frontend\", \"type\": \"feature\"}]}, {\"name\": \"frontend\", \"children\": [{\"name\": \"components\", \"type\": \"dir\"}, {\"name\": \"pages\", \"type\": \"dir\"}]}]}",
+    "decisions": [
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'analyze' queued for retry.",
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'scaffold' queued for retry.",
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'edit' queued for retry.",
+      "Replit offline \u2014 Agent not reachable at port 3004. Action 'test' queued for retry.",
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'review' queued for retry."
+    ],
+    "files": {},
+    "patterns": [
+      "fastapi",
+      "api",
+      "frontend"
+    ],
+    "stack": [
+      "fastapi"
+    ],
+    "workflow_id": "6956010c-3d8a-4f93-a793-434949b8ebb3",
+    "complexity": "medium",
+    "created_at": 1781877436.6382337,
+    "updated_at": 1781877436.638234
   }
 }

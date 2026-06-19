@@ -769,6 +769,173 @@ async def api_list_keys():
     return {"keys": api_gateway.list_keys()}
 
 
+# ── Dependency Tracker Endpoints ────────────────────────────────────────────────
+
+@app.get("/dependencies/{project_id}")
+async def api_dependencies(project_id: str):
+    """Get dependency graph for a project."""
+    try:
+        from core.dependency_tracker import dependency_tracker
+        result = dependency_tracker.scan_project(f"workspaces/{project_id}")
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/dependencies/{project_id}/broken")
+async def api_dependencies_broken(project_id: str):
+    """Get broken imports in a project."""
+    try:
+        from core.dependency_tracker import dependency_tracker
+        result = dependency_tracker.check_broken_imports(f"workspaces/{project_id}")
+        return {"broken_imports": result}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/dependencies/{project_id}/impact/{file_path:path}")
+async def api_dependencies_impact(project_id: str, file_path: str):
+    """Get impact analysis for a file."""
+    try:
+        from core.dependency_tracker import dependency_tracker
+        result = dependency_tracker.impact_analysis(f"workspaces/{project_id}", file_path)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ── Smart Rollback Endpoints ──────────────────────────────────────────────────
+
+@app.get("/rollback/history")
+async def api_rollback_history():
+    """Get checkpoint history."""
+    try:
+        from core.smart_rollback import smart_rollback
+        history = smart_rollback.rollback_history()
+        return {"checkpoints": history}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/rollback/{checkpoint_id}")
+async def api_rollback_to_checkpoint(checkpoint_id: str, project_id: str, agent_id: str, task_id: str, workspace_path: str = "workspaces"):
+    """Rollback to a checkpoint."""
+    try:
+        from core.smart_rollback import smart_rollback
+        result = await smart_rollback.rollback_agent_only(project_id, agent_id, task_id, f"{workspace_path}/{project_id}")
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/rollback/diff/{checkpoint_id}")
+async def api_rollback_diff(checkpoint_id: str):
+    """Get diff for a checkpoint."""
+    try:
+        from core.smart_rollback import smart_rollback
+        result = smart_rollback.get_checkpoint_diff(checkpoint_id)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ── Cost Estimator Endpoints ─────────────────────────────────────────────────
+
+@app.post("/cost/estimate")
+async def api_cost_estimate(request: Request):
+    """Estimate cost for a task."""
+    try:
+        from core.cost_estimator import cost_estimator
+        data = await request.json()
+        result = cost_estimator.estimate_cost(
+            task_description=data.get("requirements", data.get("task", "")),
+            agent_type=data.get("agent_type", "openhands"),
+            model=data.get("model", "gpt-3.5-turbo")
+        )
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/cost/project/{project_id}")
+async def api_cost_project(project_id: str):
+    """Get project cost breakdown."""
+    try:
+        from core.cost_estimator import cost_estimator
+        result = cost_estimator.get_project_cost(project_id)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/cost/daily")
+async def api_cost_daily(days: int = 7):
+    """Get daily costs."""
+    try:
+        from core.cost_estimator import cost_estimator
+        result = cost_estimator.get_daily_costs(days)
+        return {"daily": result}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.put("/cost/budget")
+async def api_cost_budget(request: Request):
+    """Set budget limit."""
+    try:
+        from core.cost_estimator import cost_estimator
+        data = await request.json()
+        cost_estimator.set_budget(data["project_id"], data["max_budget"])
+        return {"success": True}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ── Templates Endpoints ────────────────────────────────────────────────────────
+
+@app.get("/templates")
+async def api_templates():
+    """List all templates."""
+    try:
+        from templates.manager import template_manager
+        templates = template_manager.list_templates()
+        return {"templates": templates}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/templates/apply")
+async def api_templates_apply(request: Request):
+    """Apply a template to a new project."""
+    try:
+        from templates.manager import template_manager
+        data = await request.json()
+        result = template_manager.apply_template(
+            template_name=data["template"],
+            project_path=data.get("project_path", f"workspaces/{data['template']}"),
+            project_name=data.get("name")
+        )
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post("/templates/create")
+async def api_templates_create(request: Request):
+    """Save a project as a template."""
+    try:
+        from templates.manager import template_manager
+        data = await request.json()
+        result = template_manager.create_template_from_project(
+            project_path=data["project_path"],
+            template_name=data["template_name"],
+            description=data.get("description", "")
+        )
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # ── v7.0 Middleware ──────────────────────────────────────────
 
 @app.middleware("http")
