@@ -1,0 +1,12 @@
+openhands:
+  endpoint: "http://localhost:3001"
+  capabilities: ["AUTONOMOUS_EXECUTION"]
+aider:
+  endpoint: "http://localhost:3002"
+  capabilities: ["PRECISION_EDITING"]
+bolt:
+  endpoint: "http://localhost:3003"
+  capabilities: ["APP_GENERATION"]
+replit:
+  endpoint: "http://localhost:3004"
+  capabilities: ["RUNTIME_EXECUTION"]

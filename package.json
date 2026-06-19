@@ -1,0 +1,1 @@
+{"name":"ai-engineering-os","version":"1.0.0","scripts":{"start":"python orchestrator/main.py","setup":"pip install -r requirements.txt"}}

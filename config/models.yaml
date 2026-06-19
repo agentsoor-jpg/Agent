@@ -1,0 +1,6 @@
+reasoning:
+  primary: claude
+  fallback: gemini
+  models:
+    claude: claude-sonnet-4-20250514
+    gemini: gemini-2.5-flash

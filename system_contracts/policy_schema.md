@@ -1,0 +1,11 @@
+# Policy Schema
+
+## Execution
+- max_parallel_agents: 3
+- max_retry_attempts: 2
+
+## Routing
+- app_scaffolding: bolt
+- file_editing: aider
+- code_execution: replit
+- code_generation: openhands
