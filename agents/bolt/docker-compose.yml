@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  bolt:
+    build: .
+    ports:
+      - "3003:3003"
+    volumes:
+      - ../../workspaces:/workspaces

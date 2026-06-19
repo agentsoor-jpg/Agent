@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  openhands:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.all-hands.dev/all-hands-ai/runtime:0.47-nikolaik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../workspaces:/workspaces

@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  replit:
+    build: .
+    ports:
+      - "3004:3004"
+    volumes:
+      - ../../workspaces:/workspaces
+    privileged: true
