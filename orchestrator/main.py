@@ -622,10 +622,16 @@ except ImportError as e:
 @app.get("/api/v1/health")
 async def api_health():
     """v7 API health check."""
+    uptime_data = {}
+    if V70_MODULES_LOADED:
+        try:
+            uptime_data = uptime_tracker.get_uptime_stats()
+        except Exception:
+            uptime_data = {}
     return {
         "status": "healthy",
         "version": "7.0.0",
-        "uptime": uptime_tracker.get_uptime_stats() if V70_MODULES_LOADED else {},
+        "uptime": uptime_data,
     }
 
 

@@ -385,34 +385,33 @@ class UptimeTracker:
                 self._downtimes.append(self._current_downtime)
                 self._current_downtime = None
     
-    async def get_uptime_stats(self) -> Dict[str, Any]:
+    def get_uptime_stats(self) -> Dict[str, Any]:
         """Get uptime statistics."""
-        async with self._lock:
-            uptime = time.time() - self._start_time
-            total_downtime = sum(
-                d.get("end", time.time()) - d["start"]
-                for d in self._downtimes
-            )
-            
-            if self._current_downtime:
-                total_downtime += time.time() - self._current_downtime["start"]
-            
-            uptime_percent = (
-                (uptime - total_downtime) / uptime * 100
-                if uptime > 0 else 100
-            )
-            
-            return {
-                "uptime_seconds": uptime,
-                "uptime_hours": uptime / 3600,
-                "uptime_percent": round(uptime_percent, 2),
-                "total_downtime_seconds": total_downtime,
-                "downtime_count": len(self._downtimes) + (1 if self._current_downtime else 0),
-                "currently_down": self._current_downtime is not None,
-                "started_at": datetime.fromtimestamp(
-                    self._start_time, tz=timezone.utc
-                ).isoformat(),
-            }
+        uptime = time.time() - self._start_time
+        total_downtime = sum(
+            d.get("end", time.time()) - d["start"]
+            for d in self._downtimes
+        )
+        
+        if self._current_downtime:
+            total_downtime += time.time() - self._current_downtime["start"]
+        
+        uptime_percent = (
+            (uptime - total_downtime) / uptime * 100
+            if uptime > 0 else 100
+        )
+        
+        return {
+            "uptime_seconds": uptime,
+            "uptime_hours": uptime / 3600,
+            "uptime_percent": round(uptime_percent, 2),
+            "total_downtime_seconds": total_downtime,
+            "downtime_count": len(self._downtimes) + (1 if self._current_downtime else 0),
+            "currently_down": self._current_downtime is not None,
+            "started_at": datetime.fromtimestamp(
+                self._start_time, tz=timezone.utc
+            ).isoformat(),
+        }
 
 
 # ── Health Dashboard ───────────────────────────────────────────────────────────

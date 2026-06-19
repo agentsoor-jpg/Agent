@@ -117,5 +117,635 @@
     "created_at": 1781863397.6588829,
     "updated_at": 1781863402.7612047,
     "complexity": "medium"
+  },
+  "8e4bcb9d-0f77-4acf-b160-0672a9ea4bc8": {
+    "id": "8e4bcb9d-0f77-4acf-b160-0672a9ea4bc8",
+    "type": "full-app-generation",
+    "status": "completed",
+    "payload": {
+      "requirements": "Build a complete e-commerce API with user authentication (JWT + OAuth), Product CRUD with categories, Shopping cart and checkout, Order management, Payment integration (Stripe), Admin dashboard API, File upload for products",
+      "stack": "FastAPI + PostgreSQL + Redis + MinIO",
+      "features": null,
+      "_memory_context": {
+        "similar_projects": [],
+        "preferences": {},
+        "common_patterns": [],
+        "loaded_at": 1781877231.5903764
+      },
+      "_plan": {
+        "plan_id": "c5cff51f-f446-4d63-b87d-5fecbad16a5e",
+        "requirements": "Build a complete e-commerce API with user authentication (JWT + OAuth), Product CRUD with categories, Shopping cart and checkout, Order management, Payment integration (Stripe), Admin dashboard API, File upload for products",
+        "complexity": "complex",
+        "detected_stack": [
+          "minio",
+          "redis",
+          "postgresql",
+          "+",
+          "fastapi",
+          "jwt"
+        ],
+        "detected_features": [
+          "authentication",
+          "api",
+          "frontend",
+          "file_upload"
+        ],
+        "phases": [
+          {
+            "name": "analysis",
+            "description": "Analyze requirements, design architecture, and create file structure plan",
+            "agent": "openhands",
+            "action": "analyze",
+            "files_to_create": [
+              "ARCHITECTURE.md",
+              "file_plan.json"
+            ],
+            "dependencies": [],
+            "estimated_time": "30s",
+            "validation": "analysis_complete"
+          },
+          {
+            "name": "scaffold",
+            "description": "Generate project scaffold and boilerplate for minio",
+            "agent": "bolt",
+            "action": "scaffold",
+            "files_to_create": [
+              "README.md",
+              "requirements.txt"
+            ],
+            "dependencies": [
+              "analysis"
+            ],
+            "estimated_time": "45s",
+            "validation": "files_created"
+          },
+          {
+            "name": "implementation",
+            "description": "Implement core business logic, models, and API routes",
+            "agent": "aider",
+            "action": "edit",
+            "files_to_create": [
+              "routers/",
+              "schemas.py",
+              "auth.py",
+              "security.py"
+            ],
+            "dependencies": [
+              "scaffold"
+            ],
+            "estimated_time": "2m",
+            "validation": "files_modified"
+          },
+          {
+            "name": "advanced_features",
+            "description": "Implement authentication, real-time features, and integrations",
+            "agent": "openhands",
+            "action": "execute",
+            "files_to_create": [
+              "auth_routes.py"
+            ],
+            "dependencies": [
+              "implementation"
+            ],
+            "estimated_time": "3m",
+            "validation": "features_complete"
+          },
+          {
+            "name": "testing",
+            "description": "Run tests, verify imports, check all endpoints",
+            "agent": "replit",
+            "action": "test",
+            "files_to_create": [
+              "tests/test_main.py"
+            ],
+            "dependencies": [
+              "implementation"
+            ],
+            "estimated_time": "1m",
+            "validation": "tests_pass"
+          },
+          {
+            "name": "review",
+            "description": "Code review, security audit, and final validation",
+            "agent": "openhands",
+            "action": "review",
+            "files_to_create": [
+              "REVIEW.md"
+            ],
+            "dependencies": [
+              "testing"
+            ],
+            "estimated_time": "30s",
+            "validation": "review_complete"
+          }
+        ],
+        "component_tree": {
+          "name": "project",
+          "children": [
+            {
+              "name": "backend",
+              "tech": "minio",
+              "children": [
+                {
+                  "name": "authentication",
+                  "type": "feature"
+                },
+                {
+                  "name": "api",
+                  "type": "feature"
+                },
+                {
+                  "name": "frontend",
+                  "type": "feature"
+                },
+                {
+                  "name": "file_upload",
+                  "type": "feature"
+                }
+              ]
+            },
+            {
+              "name": "frontend",
+              "children": [
+                {
+                  "name": "components",
+                  "type": "dir"
+                },
+                {
+                  "name": "pages",
+                  "type": "dir"
+                }
+              ]
+            }
+          ]
+        },
+        "estimates": {
+          "files_min": 20,
+          "files_max": 50,
+          "lines_min": 1000,
+          "lines_max": 5000,
+          "estimated_hours": 8
+        },
+        "total_phases": 6,
+        "agents_involved": [
+          "replit",
+          "bolt",
+          "aider",
+          "openhands"
+        ],
+        "created_at": 1781877231.5904884,
+        "resolved_order": {
+          "order": [
+            "analysis",
+            "scaffold",
+            "implementation",
+            "advanced_features",
+            "testing",
+            "review"
+          ],
+          "cycles": [],
+          "resolved": true,
+          "parallel_groups": [
+            [
+              "analysis"
+            ],
+            [
+              "scaffold"
+            ],
+            [
+              "implementation"
+            ],
+            [
+              "advanced_features",
+              "testing"
+            ],
+            [
+              "review"
+            ]
+          ],
+          "cycle_breaks": []
+        }
+      }
+    },
+    "steps": [
+      {
+        "agent": "openhands",
+        "action": "analyze",
+        "timeout": 120,
+        "fallback": null,
+        "max_retries": 2,
+        "validation": "analysis_complete"
+      },
+      {
+        "agent": "bolt",
+        "action": "scaffold",
+        "timeout": 300,
+        "fallback": "openhands",
+        "max_retries": 2,
+        "validation": "files_created"
+      },
+      {
+        "agent": "aider",
+        "action": "edit",
+        "timeout": 300,
+        "fallback": "openhands",
+        "max_retries": 2,
+        "validation": "files_modified"
+      },
+      {
+        "agent": "replit",
+        "action": "test",
+        "timeout": 120,
+        "fallback": null,
+        "max_retries": 1,
+        "validation": "tests_pass"
+      },
+      {
+        "agent": "openhands",
+        "action": "review",
+        "timeout": 120,
+        "fallback": null,
+        "max_retries": 1,
+        "validation": "review_complete"
+      }
+    ],
+    "phases": [
+      "context",
+      "plan",
+      "execute",
+      "verify",
+      "learn"
+    ],
+    "results": [
+      {
+        "task_id": "fbebb475-9e24-48eb-8c08-8f749df9e88a",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'analyze' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "action": "analyze",
+        "step_agent": "openhands",
+        "step_index": 0
+      },
+      {
+        "task_id": "371dbf18-e9aa-4c2a-9d5f-31f02e294ad2",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'scaffold' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "_fell_back_from": "bolt",
+        "action": "scaffold",
+        "step_agent": "bolt",
+        "step_index": 1
+      },
+      {
+        "task_id": "3f143bb5-1097-449c-809d-659fc2e68e00",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'edit' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "_fell_back_from": "aider",
+        "action": "edit",
+        "step_agent": "aider",
+        "step_index": 2
+      },
+      {
+        "task_id": "2f93991b-1d99-442f-8d4f-aaec01c7d8b2",
+        "agent_id": "replit",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "Replit offline \u2014 Agent not reachable at port 3004. Action 'test' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3004",
+        "artifacts": [],
+        "stdout": "",
+        "stderr": "Agent not reachable at port 3004",
+        "exit_code": -1,
+        "tests_passed": null,
+        "action": "test",
+        "step_agent": "replit",
+        "step_index": 3
+      },
+      {
+        "task_id": "04cf64b7-c88b-4b4b-a239-4a0cacf94780",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'review' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "action": "review",
+        "step_agent": "openhands",
+        "step_index": 4
+      }
+    ],
+    "plan": {
+      "plan_id": "c5cff51f-f446-4d63-b87d-5fecbad16a5e",
+      "requirements": "Build a complete e-commerce API with user authentication (JWT + OAuth), Product CRUD with categories, Shopping cart and checkout, Order management, Payment integration (Stripe), Admin dashboard API, File upload for products",
+      "complexity": "complex",
+      "detected_stack": [
+        "minio",
+        "redis",
+        "postgresql",
+        "+",
+        "fastapi",
+        "jwt"
+      ],
+      "detected_features": [
+        "authentication",
+        "api",
+        "frontend",
+        "file_upload"
+      ],
+      "phases": [
+        {
+          "name": "analysis",
+          "description": "Analyze requirements, design architecture, and create file structure plan",
+          "agent": "openhands",
+          "action": "analyze",
+          "files_to_create": [
+            "ARCHITECTURE.md",
+            "file_plan.json"
+          ],
+          "dependencies": [],
+          "estimated_time": "30s",
+          "validation": "analysis_complete"
+        },
+        {
+          "name": "scaffold",
+          "description": "Generate project scaffold and boilerplate for minio",
+          "agent": "bolt",
+          "action": "scaffold",
+          "files_to_create": [
+            "README.md",
+            "requirements.txt"
+          ],
+          "dependencies": [
+            "analysis"
+          ],
+          "estimated_time": "45s",
+          "validation": "files_created"
+        },
+        {
+          "name": "implementation",
+          "description": "Implement core business logic, models, and API routes",
+          "agent": "aider",
+          "action": "edit",
+          "files_to_create": [
+            "routers/",
+            "schemas.py",
+            "auth.py",
+            "security.py"
+          ],
+          "dependencies": [
+            "scaffold"
+          ],
+          "estimated_time": "2m",
+          "validation": "files_modified"
+        },
+        {
+          "name": "advanced_features",
+          "description": "Implement authentication, real-time features, and integrations",
+          "agent": "openhands",
+          "action": "execute",
+          "files_to_create": [
+            "auth_routes.py"
+          ],
+          "dependencies": [
+            "implementation"
+          ],
+          "estimated_time": "3m",
+          "validation": "features_complete"
+        },
+        {
+          "name": "testing",
+          "description": "Run tests, verify imports, check all endpoints",
+          "agent": "replit",
+          "action": "test",
+          "files_to_create": [
+            "tests/test_main.py"
+          ],
+          "dependencies": [
+            "implementation"
+          ],
+          "estimated_time": "1m",
+          "validation": "tests_pass"
+        },
+        {
+          "name": "review",
+          "description": "Code review, security audit, and final validation",
+          "agent": "openhands",
+          "action": "review",
+          "files_to_create": [
+            "REVIEW.md"
+          ],
+          "dependencies": [
+            "testing"
+          ],
+          "estimated_time": "30s",
+          "validation": "review_complete"
+        }
+      ],
+      "component_tree": {
+        "name": "project",
+        "children": [
+          {
+            "name": "backend",
+            "tech": "minio",
+            "children": [
+              {
+                "name": "authentication",
+                "type": "feature"
+              },
+              {
+                "name": "api",
+                "type": "feature"
+              },
+              {
+                "name": "frontend",
+                "type": "feature"
+              },
+              {
+                "name": "file_upload",
+                "type": "feature"
+              }
+            ]
+          },
+          {
+            "name": "frontend",
+            "children": [
+              {
+                "name": "components",
+                "type": "dir"
+              },
+              {
+                "name": "pages",
+                "type": "dir"
+              }
+            ]
+          }
+        ]
+      },
+      "estimates": {
+        "files_min": 20,
+        "files_max": 50,
+        "lines_min": 1000,
+        "lines_max": 5000,
+        "estimated_hours": 8
+      },
+      "total_phases": 6,
+      "agents_involved": [
+        "replit",
+        "bolt",
+        "aider",
+        "openhands"
+      ],
+      "created_at": 1781877231.5904884,
+      "resolved_order": {
+        "order": [
+          "analysis",
+          "scaffold",
+          "implementation",
+          "advanced_features",
+          "testing",
+          "review"
+        ],
+        "cycles": [],
+        "resolved": true,
+        "parallel_groups": [
+          [
+            "analysis"
+          ],
+          [
+            "scaffold"
+          ],
+          [
+            "implementation"
+          ],
+          [
+            "advanced_features",
+            "testing"
+          ],
+          [
+            "review"
+          ]
+        ],
+        "cycle_breaks": []
+      }
+    },
+    "verification": {
+      "workflow_id": "8e4bcb9d-0f77-4acf-b160-0672a9ea4bc8",
+      "build": {
+        "passed": true,
+        "workspace": "workspaces",
+        "results": {
+          "syntax": {
+            "passed": true,
+            "details": "No .py files found",
+            "files_checked": 0,
+            "errors": []
+          },
+          "pytest": {
+            "passed": true,
+            "details": "No tests found \u2014 skipped",
+            "skipped": true
+          },
+          "pip_check": {
+            "passed": true,
+            "output": "No broken requirements found.\n",
+            "details": "pip dependency check"
+          }
+        },
+        "duration_s": 0.25,
+        "healing_needed": false,
+        "healing_suggestions": []
+      },
+      "completeness": {
+        "complete": false,
+        "percentage": 0.0,
+        "required_features": [
+          "authentication",
+          "api"
+        ],
+        "found_features": [],
+        "missing_features": [
+          "authentication",
+          "api"
+        ],
+        "built_files": [],
+        "file_count": 0,
+        "report": "Built 0 files | Features: 0/2 complete (0%) | Missing: authentication, api",
+        "checked_at": 1781877236.942417
+      },
+      "validation": [
+        {
+          "step": "analyze",
+          "agent": "openhands",
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "step": "scaffold",
+          "agent": "openhands",
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "step": "edit",
+          "agent": "openhands",
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "step": "test",
+          "agent": "replit",
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        {
+          "step": "review",
+          "agent": "openhands",
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        }
+      ],
+      "overall_passed": false,
+      "verified_at": 1781877236.942442
+    },
+    "memory_stored": true,
+    "created_at": 1781877231.5905428,
+    "updated_at": 1781877236.9444158,
+    "complexity": "medium",
+    "project_id": "babefcd1-3ef8-4209-b766-c3c6ef063608"
   }
 }

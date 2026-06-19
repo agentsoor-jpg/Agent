@@ -12,5 +12,43 @@
     "complexity": "medium",
     "created_at": 1781875997.6249948,
     "updated_at": 1781875997.6249952
+  },
+  "babefcd1-3ef8-4209-b766-c3c6ef063608": {
+    "id": "babefcd1-3ef8-4209-b766-c3c6ef063608",
+    "name": "Workflow: full-app-generation",
+    "description": "Build a complete e-commerce API with user authentication (JWT + OAuth), Product CRUD with categories, Shopping cart and checkout, Order management, Payment integration (Stripe), Admin dashboard API, File upload for products",
+    "architecture": "{\"name\": \"project\", \"children\": [{\"name\": \"backend\", \"tech\": \"minio\", \"children\": [{\"name\": \"authentication\", \"type\": \"feature\"}, {\"name\": \"api\", \"type\": \"feature\"}, {\"name\": \"frontend\", \"type\": \"feature\"}, {\"name\": \"file_upload\", \"type\": \"feature\"}]}, {\"name\": \"frontend\", \"children\": [{\"name\": \"components\", \"type\": \"dir\"}, {\"name\": \"pages\", \"type\": \"dir\"}]}]}",
+    "decisions": [
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'analyze' queued for retry.",
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'scaffold' queued for retry.",
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'edit' queued for retry.",
+      "Replit offline \u2014 Agent not reachable at port 3004. Action 'test' queued for retry.",
+      "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'review' queued for retry."
+    ],
+    "files": {},
+    "patterns": [
+      "minio",
+      "redis",
+      "postgresql",
+      "+",
+      "fastapi",
+      "jwt",
+      "authentication",
+      "api",
+      "frontend",
+      "file_upload"
+    ],
+    "stack": [
+      "minio",
+      "redis",
+      "postgresql",
+      "+",
+      "fastapi",
+      "jwt"
+    ],
+    "workflow_id": "8e4bcb9d-0f77-4acf-b160-0672a9ea4bc8",
+    "complexity": "complex",
+    "created_at": 1781877236.9429653,
+    "updated_at": 1781877236.9429653
   }
 }
