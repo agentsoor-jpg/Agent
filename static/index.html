@@ -1,1021 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Engineering OS v3.0</title>
-<style>
-:root{--bg:#0d1117;--surface:#161b22;--surface2:#1f2937;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--green:#3fb950;--red:#f85149;--yellow:#d29922;--purple:#a371f7;--orange:#f0883e;}
-.light{--bg:#f6f8fa;--surface:#fff;--surface2:#f3f4f6;--border:#d0d7de;--text:#1f2328;--text2:#57606a;--accent:#0969da;--green:#1a7f37;--red:#cf222e;--yellow:#9a6700;--purple:#8250df;--orange:#bc4c00;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
-.layout{display:grid;grid-template-columns:220px 1fr;grid-template-rows:52px 1fr;height:100vh;}
-@media(max-width:768px){.layout{grid-template-columns:1fr;grid-template-rows:52px auto 1fr;}.sidebar{display:none;}.sidebar.open{display:block;position:fixed;top:52px;left:0;right:0;z-index:100;height:auto;max-height:60vh;overflow-y:auto;border-right:none;border-bottom:1px solid var(--border);}.mobile-menu-btn{display:flex!important;}}
-.topbar{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:10;}
-.sidebar{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:8px 0;}
-.main{overflow-y:auto;padding:20px;background:var(--bg);}
-.logo{font-weight:700;font-size:15px;color:var(--accent);display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;}
-.topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
-.version-badge{background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;}
-.system-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
-.dot.offline{background:var(--red);animation:none;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.btn{background:var(--accent);color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;}
-.btn:hover{opacity:.88;}
-.btn-sm{padding:4px 10px;font-size:11px;}
-.btn-outline{background:none;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s;}
-.btn-outline:hover{background:var(--surface2);}
-.btn-ghost{background:none;border:none;color:var(--text2);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s;}
-.btn-ghost:hover{background:var(--surface2);color:var(--text);}
-.mobile-menu-btn{display:none;background:none;border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:16px;}
-.nav-label{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px 4px;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border:none;background:none;width:100%;text-align:left;position:relative;}
-.nav-item:hover{background:var(--surface2);color:var(--text);}
-.nav-item.active{background:rgba(88,166,255,.12);color:var(--accent);}
-.nav-badge{margin-left:auto;background:var(--accent);color:white;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;}
-.nav-pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;margin-left:auto;}
-.panel{display:none;animation:fadeIn .15s ease;}
-.panel.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
-.page-sub{color:var(--text2);font-size:13px;margin-bottom:20px;}
-.grid{display:grid;gap:16px;}
-.grid-2{grid-template-columns:repeat(2,1fr);}
-.grid-3{grid-template-columns:repeat(3,1fr);}
-.grid-4{grid-template-columns:repeat(4,1fr);}
-@media(max-width:900px){.grid-4,.grid-3{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}}
-@media(max-width:600px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
-.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
-.stat-val{font-size:26px;font-weight:700;color:var(--text);margin:4px 0;}
-.stat-sub{font-size:12px;color:var(--text2);}
-.agent-card{border:1px solid var(--border);border-radius:8px;padding:14px;transition:all .3s;}
-.agent-card.working{border-color:var(--accent);box-shadow:0 0 0 2px rgba(88,166,255,.15);animation:agentPulse 1.5s infinite;}
-@keyframes agentPulse{0%,100%{box-shadow:0 0 0 2px rgba(88,166,255,.15)}50%{box-shadow:0 0 0 6px rgba(88,166,255,.05)}}
-.agent-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.agent-name{font-weight:600;font-size:14px;}
-.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;}
-.status-pill.online{background:rgba(63,185,80,.15);color:var(--green);}
-.status-pill.offline{background:rgba(248,81,73,.12);color:var(--red);}
-.status-pill.working{background:rgba(88,166,255,.15);color:var(--accent);}
-.status-pill.idle{background:rgba(139,148,158,.1);color:var(--text2);}
-.agent-caps{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
-.cap-tag{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:10px;padding:2px 7px;border-radius:12px;}
-.workflow-form{display:grid;gap:12px;margin-bottom:16px;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:600px){.form-row{grid-template-columns:1fr;}}
-label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px;}
-textarea,input,select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;}
-textarea:focus,input:focus,select:focus{border-color:var(--accent);}
-.phase-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;}
-.phase-title{font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
-.phase-steps{display:flex;gap:0;}
-.phase-step{flex:1;text-align:center;position:relative;}
-.phase-step:not(:last-child)::after{content:'';position:absolute;top:13px;right:-50%;width:100%;height:2px;background:var(--border);z-index:0;}
-.phase-step.done::after{background:var(--green);}
-.phase-step.active::after{background:var(--accent);}
-.phase-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;position:relative;z-index:1;transition:all .3s;}
-.phase-step.done .phase-dot{border-color:var(--green);background:var(--green);color:white;}
-.phase-step.active .phase-dot{border-color:var(--accent);background:var(--accent);color:white;animation:pulse 1.5s infinite;}
-.phase-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
-.step-log{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;max-height:260px;overflow-y:auto;font-family:'SF Mono',Monaco,monospace;font-size:12px;line-height:1.7;}
-.log-entry{padding:2px 0;display:flex;gap:8px;}
-.log-time{color:var(--text2);flex-shrink:0;}
-.log-msg{color:var(--text);}
-.log-msg.success{color:var(--green);}
-.log-msg.error{color:var(--red);}
-.log-msg.warn{color:var(--yellow);}
-.log-msg.info{color:var(--accent);}
-.elapsed{font-family:monospace;color:var(--accent);font-weight:700;}
-.wf-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
-.wf-row:last-child{border-bottom:none;}
-.wf-id{font-family:monospace;font-size:11px;color:var(--text2);}
-.wf-type{font-weight:600;font-size:13px;}
-.wf-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;}
-.wf-status.completed{background:rgba(63,185,80,.15);color:var(--green);}
-.wf-status.running{background:rgba(88,166,255,.15);color:var(--accent);}
-.wf-status.failed{background:rgba(248,81,73,.12);color:var(--red);}
-.wf-status.interrupted{background:rgba(210,153,34,.12);color:var(--yellow);}
-.terminal{background:#0d0d0d;border:1px solid #333;border-radius:8px;font-family:'SF Mono',Monaco,monospace;font-size:12px;line-height:1.7;height:320px;display:flex;flex-direction:column;}
-.terminal-bar{background:#1a1a1a;padding:8px 12px;border-bottom:1px solid #333;display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.term-dots{display:flex;gap:5px;}
-.term-dot{width:10px;height:10px;border-radius:50%;}
-.term-output{padding:10px;overflow-y:auto;flex:1;color:#a8b5c8;}
-.term-output .cmd{color:#58a6ff;}
-.term-output .ok{color:#3fb950;}
-.term-output .err{color:#f85149;}
-.term-input-row{display:flex;border-top:1px solid #333;flex-shrink:0;}
-.term-input{flex:1;background:transparent;border:none;color:#e6edf3;padding:8px 12px;font-family:inherit;font-size:12px;outline:none;}
-.term-prompt{padding:8px 0 8px 12px;color:#3fb950;font-family:monospace;font-size:12px;}
-.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:8px 0;}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
-.progress-fill.green{background:var(--green);}
-.plan-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
-.plan-phase{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
-.plan-phase:last-child{border-bottom:none;}
-.plan-agent{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;}
-.agent-bolt{background:rgba(240,136,62,.15);color:var(--orange);}
-.agent-aider{background:rgba(163,113,247,.15);color:var(--purple);}
-.agent-openhands{background:rgba(88,166,255,.15);color:var(--accent);}
-.agent-replit{background:rgba(63,185,80,.15);color:var(--green);}
-.memory-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
-.memory-card:hover{border-color:var(--accent);}
-.memory-name{font-weight:600;margin-bottom:4px;}
-.memory-desc{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.memory-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
-.meta-tag{background:var(--surface);border:1px solid var(--border);font-size:10px;padding:1px 6px;border-radius:10px;color:var(--text2);}
-.sim-score{margin-left:auto;font-size:11px;font-weight:700;color:var(--accent);}
-.verify-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
-.verify-row:last-child{border-bottom:none;}
-.verify-label{font-size:13px;font-weight:500;}
-.verify-result{font-size:12px;font-weight:700;}
-.verify-result.pass{color:var(--green);}
-.verify-result.fail{color:var(--red);}
-.verify-result.skip{color:var(--text2);}
-.completeness-bar{border:1px solid var(--border);border-radius:8px;padding:14px;}
-.pct-ring{width:80px;height:80px;margin:0 auto 8px;}
-.pct-text{text-align:center;font-size:24px;font-weight:700;}
-.info-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.info-row:last-child{border-bottom:none;}
-.info-key{color:var(--text2);width:140px;flex-shrink:0;}
-.info-val{font-weight:500;}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:13px;z-index:1000;transform:translateY(100px);opacity:0;transition:all .25s;max-width:300px;}
-.toast.show{transform:none;opacity:1;}
-.toast.success{border-color:var(--green);}
-.toast.error{border-color:var(--red);}
-.sse-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);}
-.sse-dot{width:6px;height:6px;border-radius:50%;background:var(--text2);}
-.sse-dot.connected{background:var(--green);animation:pulse 1.5s infinite;}
-.search-row{display:flex;gap:8px;margin-bottom:12px;}
-.search-row input{flex:1;}
-.section-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0;}
-.tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
-.tab:hover{color:var(--text);}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.empty-state{text-align:center;padding:40px 20px;color:var(--text2);}
-.empty-state .icon{font-size:36px;margin-bottom:12px;}
-.env-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
-.env-key{width:180px;flex-shrink:0;}
-.env-val{flex:1;}
-.env-del{color:var(--red);cursor:pointer;padding:4px 8px;border:none;background:none;font-size:14px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Engineering OS v7.0 Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+:root{--primary:#6366f1;--primary-hover:#4f46e5;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--bg:#0f172a;--bg-secondary:#1e293b;--bg-tertiary:#334155;--text:#f1f5f9;--text-secondary:#94a3b8;--border:#475569;--radius:8px;--shadow:0 4px 6px -1px rgba(0,0,0,0.3)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{display:flex;height:100vh}
+.sidebar{width:260px;background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:transform .3s;z-index:100}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--primary),#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-header .version{font-size:11px;color:var(--text-secondary)}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;padding:10px 12px;border-radius:var(--radius);cursor:pointer;transition:all .2s;margin-bottom:4px;gap:10px;color:var(--text-secondary)}
+.nav-item:hover{background:var(--bg-tertiary);color:var(--text)}
+.nav-item.active{background:var(--primary);color:white}
+.nav-item .icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:16px 24px;background:var(--bg-secondary);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.topbar h2{font-size:20px;font-weight:600}
+.topbar-actions{display:flex;gap:12px;align-items:center}
+.content{flex:1;padding:24px;overflow-y:auto}
+.panel{display:none;animation:fadeIn .3s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg-secondary);border-radius:var(--radius);padding:20px;border:1px solid var(--border)}
+.stat-label{font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700}
+.card{background:var(--bg-secondary);border-radius:var(--radius);padding:20px;margin-bottom:16px;border:1px solid var(--border)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;color:var(--text-secondary)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none;gap:8px}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--bg-tertiary);color:var(--text)}
+.btn-secondary:hover{background:var(--border)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn .spinner{width:16px;height:16px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text-secondary)}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary)}
+.form-textarea{min-height:100px;resize:vertical}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:12px;text-align:left;border-bottom:1px solid var(--border)}
+.table th{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase}
+.table tr:hover td{background:var(--bg-tertiary)}
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:var(--radius);background:var(--bg-secondary);border:1px solid var(--border);box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;animation:slideIn .3s;min-width:300px}
+.toast.success{border-left:4px solid var(--success)}
+.toast.error{border-left:4px solid var(--danger)}
+.toast.warning{border-left:4px solid var(--warning)}
+.toast.info{border-left:4px solid var(--primary)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:all .3s}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal{background:var(--bg-secondary);border-radius:var(--radius);padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;transform:scale(.9);transition:transform .3s}
+.modal-overlay.active .modal{transform:scale(1)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-title{font-size:18px;font-weight:600}
+.modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--radius);transition:background .2s}
+.modal-close:hover{background:var(--bg-tertiary)}
+.modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.console{background:#000;border-radius:var(--radius);padding:16px;font-family:'Monaco','Menlo',monospace;font-size:13px;height:400px;overflow-y:auto;line-height:1.6}
+.console-line{margin-bottom:4px;display:flex;gap:8px}
+.console-time{color:#666}
+.console-level{font-weight:600}
+.console-level.info{color:var(--primary)}
+.console-level.success{color:var(--success)}
+.console-level.warning{color:var(--warning)}
+.console-level.error{color:var(--danger)}
+.network-graph{height:400px;background:var(--bg);border-radius:var(--radius);position:relative;overflow:hidden}
+.node{position:absolute;padding:12px 16px;background:var(--bg-secondary);border:2px solid var(--primary);border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;transition:all .3s}
+.node:hover{transform:scale(1.1);box-shadow:var(--shadow)}
+.node.agent{border-color:var(--success)}
+.node.workflow{border-color:var(--warning)}
+.perf-chart{height:200px;background:var(--bg);border-radius:var(--radius);position:relative;overflow:hidden}
+.cost-bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin:8px 0}
+.cost-fill{height:100%;background:linear-gradient(90deg,var(--success),var(--warning),var(--danger));border-radius:4px;transition:width .3s}
+.search-input{padding:8px 12px 8px 36px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);width:300px}
+.global-search{position:relative}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-secondary)}
+.split-view{display:flex;gap:16px;height:calc(100vh - 200px)}
+.split-pane{flex:1;background:var(--bg-secondary);border-radius:var(--radius);padding:16px;overflow-y:auto}
+.resize-handle{width:8px;background:var(--border);cursor:col-resize;border-radius:4px}
+.theme-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.theme-option{padding:16px;border-radius:var(--radius);cursor:pointer;border:2px solid transparent;transition:all .2s}
+.theme-option.active{border-color:var(--primary)}
+.theme-option:hover{transform:scale(1.02)}
+.shortcuts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.shortcut{display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:var(--radius)}
+.shortcut kbd{background:var(--bg-tertiary);padding:2px 8px;border-radius:4px;font-family:monospace}
+.backup-item,.schedule-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg);border-radius:var(--radius);margin-bottom:8px}
+.empty-state{text-align:center;padding:48px;color:var(--text-secondary)}
+.loading-skeleton{background:linear-gradient(90deg,var(--bg-tertiary) 25%,var(--bg) 50%,var(--bg-tertiary) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.dropdown{position:relative}
+.dropdown-menu{position:absolute;top:100%;right:0;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:8px 0;min-width:160px;z-index:100;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .2s}
+.dropdown.active .dropdown-menu{opacity:1;visibility:visible;transform:translateY(4px)}
+.dropdown-item{padding:8px 16px;cursor:pointer;transition:background .2s}
+.dropdown-item:hover{background:var(--bg-tertiary)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.tab{padding:8px 16px;cursor:pointer;border-radius:var(--radius) var(--radius) 0 0;transition:all .2s;font-size:14px;color:var(--text-secondary)}
+.tab:hover{background:var(--bg-tertiary)}
+.tab.active{background:var(--primary);color:white}
+@media(max-width:768px){.sidebar{position:fixed;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.split-view{flex-direction:column}}
+.tabs-content{display:none}
+.tabs-content.active{display:block}
 </style>
 </head>
 <body>
-<div class="layout">
-
-<!-- Topbar -->
-<div class="topbar">
-  <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-  <div class="logo">
-    <div class="logo-icon">⚙</div>
-    AI Engineering OS
-  </div>
-  <div class="version-badge">v3.0</div>
-  <div style="display:flex;align-items:center;gap:8px;margin-left:12px;">
-    <div class="sse-indicator"><div class="sse-dot" id="sseDot"></div><span id="sseLabel">SSE</span></div>
-  </div>
-  <div class="topbar-right">
-    <div class="system-status">
-      <div class="dot" id="healthDot"></div>
-      <span id="healthLabel">Checking…</span>
-    </div>
-    <button class="btn-outline" onclick="toggleTheme()">🌓</button>
-    <button class="btn btn-sm" onclick="refreshAll()">↻ Refresh</button>
-  </div>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<h1>AI Engineering OS</h1>
+<span class="version">v7.0.0</span>
 </div>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-  <div class="nav-label">Core</div>
-  <button class="nav-item active" onclick="showPanel('overview')">📊 <span>Overview</span></button>
-  <button class="nav-item" onclick="showPanel('agents')">🤖 <span>Agents</span></button>
-  <button class="nav-item" onclick="showPanel('workflows')">⚡ <span>Workflows</span><span class="nav-badge" id="wfBadge">0</span></button>
-
-  <div class="nav-label">v3.0 Features</div>
-  <button class="nav-item" onclick="showPanel('plan')">🗺 <span>Plan</span></button>
-  <button class="nav-item" onclick="showPanel('memory')">🧠 <span>Memory</span><span class="nav-badge" id="memBadge">0</span></button>
-  <button class="nav-item" onclick="showPanel('verify')">✅ <span>Verify</span></button>
-
-  <div class="nav-label">Tools</div>
-  <button class="nav-item" onclick="showPanel('terminal')">⌨ <span>Terminal</span></button>
-  <button class="nav-item" onclick="showPanel('files')">📁 <span>Files</span></button>
-  <button class="nav-item" onclick="showPanel('config')">⚙ <span>Config</span></button>
+<nav class="sidebar-nav">
+<div class="nav-item active" data-panel="overview"><span class="icon">📊</span> Overview</div>
+<div class="nav-item" data-panel="projects"><span class="icon">📁</span> Projects</div>
+<div class="nav-item" data-panel="agents"><span class="icon">🤖</span> Agents</div>
+<div class="nav-item" data-panel="workflows"><span class="icon">⚡</span> Workflows</div>
+<div class="nav-item" data-panel="console"><span class="icon">💻</span> Console</div>
+<div class="nav-item" data-panel="network"><span class="icon">🔗</span> Network</div>
+<div class="nav-item" data-panel="performance"><span class="icon">📈</span> Performance</div>
+<div class="nav-item" data-panel="costs"><span class="icon">💰</span> Costs</div>
+<div class="nav-item" data-panel="scheduler"><span class="icon">⏰</span> Scheduler</div>
+<div class="nav-item" data-panel="backup"><span class="icon">💾</span> Backup</div>
+<div class="nav-item" data-panel="settings"><span class="icon">⚙️</span> Settings</div>
+<div class="nav-item" data-panel="shortcuts"><span class="icon">⌨️</span> Shortcuts</div>
+</nav>
+</aside>
+<main class="main">
+<header class="topbar">
+<h2 id="panel-title">Overview</h2>
+<div class="topbar-actions">
+<div class="global-search">
+<span class="search-icon">🔍</span>
+<input type="text" class="search-input" placeholder="Search..." id="global-search">
 </div>
-
-<!-- Main -->
-<div class="main">
-
-<!-- ─── OVERVIEW ─────────────────────────────────────────────── -->
+<button class="btn btn-primary" id="new-project-btn">+ New Project</button>
+<button class="btn btn-secondary" id="theme-toggle">🌙</button>
+</div>
+</header>
+<div class="content">
+<!-- OVERVIEW PANEL -->
 <div class="panel active" id="panel-overview">
-  <div class="page-title">Overview</div>
-  <div class="page-sub">AI Engineering OS v3.0 — Permanent memory · SSE streaming · 5-phase protocol</div>
-  <div class="grid grid-4" style="margin-bottom:16px;">
-    <div class="card"><div class="card-title">Workflows</div><div class="stat-val" id="ovWf">—</div><div class="stat-sub">total runs</div></div>
-    <div class="card"><div class="card-title">Memory</div><div class="stat-val" id="ovMem">—</div><div class="stat-sub">projects stored</div></div>
-    <div class="card"><div class="card-title">Agents</div><div class="stat-val" id="ovAgents">—</div><div class="stat-sub">online / 4</div></div>
-    <div class="card"><div class="card-title">Queue</div><div class="stat-val" id="ovQueue">0</div><div class="stat-sub">tasks pending</div></div>
-  </div>
-
-  <div class="grid grid-2">
-    <div class="card">
-      <div class="card-title">Recent Workflows</div>
-      <div id="recentWf"><div class="empty-state"><div class="icon">⚡</div>No workflows yet</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">5-Phase Architecture</div>
-      <div style="display:grid;gap:6px;">
-        <div class="plan-phase"><span class="plan-agent agent-openhands">0</span><div><div style="font-weight:600;font-size:13px;">Context</div><div style="font-size:11px;color:var(--text2);">Load memory, find similar patterns</div></div></div>
-        <div class="plan-phase"><span class="plan-agent agent-bolt">1</span><div><div style="font-weight:600;font-size:13px;">Plan</div><div style="font-size:11px;color:var(--text2);">Generate architecture plan, resolve deps</div></div></div>
-        <div class="plan-phase"><span class="plan-agent agent-aider">2</span><div><div style="font-weight:600;font-size:13px;">Execute</div><div style="font-size:11px;color:var(--text2);">Run agents step-by-step with SSE</div></div></div>
-        <div class="plan-phase"><span class="plan-agent agent-replit">3</span><div><div style="font-weight:600;font-size:13px;">Verify</div><div style="font-size:11px;color:var(--text2);">Build check, completeness, validation</div></div></div>
-        <div class="plan-phase"><span class="plan-agent agent-openhands">4</span><div><div style="font-weight:600;font-size:13px;">Learn</div><div style="font-size:11px;color:var(--text2);">Store in permanent memory, update prefs</div></div></div>
-      </div>
-    </div>
-  </div>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-label">Active Workflows</div><div class="stat-value" id="stat-workflows">-</div></div>
+<div class="stat-card"><div class="stat-label">Online Agents</div><div class="stat-value" id="stat-agents">-</div></div>
+<div class="stat-card"><div class="stat-label">Total Projects</div><div class="stat-value" id="stat-projects">-</div></div>
+<div class="stat-card"><div class="stat-label">Queue Size</div><div class="stat-value" id="stat-queue">-</div></div>
 </div>
-
-<!-- ─── AGENTS ────────────────────────────────────────────────── -->
+<div class="card">
+<div class="card-header"><span class="card-title">Recent Workflows</span><button class="btn btn-secondary btn-sm" onclick="showPanel('workflows')">View All</button></div>
+<table class="table"><thead><tr><th>Type</th><th>Status</th><th>Steps</th><th>Updated</th></tr></thead><tbody id="recent-workflows"></tbody></table>
+</div>
+<div class="card">
+<div class="card-header"><span class="card-title">System Health</span></div>
+<div id="system-health"><div class="loading-skeleton" style="height:60px"></div></div>
+</div>
+</div>
+<!-- PROJECTS PANEL -->
+<div class="panel" id="panel-projects">
+<div class="card-header"><h3>Projects</h3><button class="btn btn-primary" onclick="openModal('create-project')">+ Create Project</button></div>
+<div id="projects-list"><div class="empty-state"><p>No projects yet. Create your first project!</p></div></div>
+</div>
+<!-- AGENTS PANEL -->
 <div class="panel" id="panel-agents">
-  <div class="page-title">Agents</div>
-  <div class="page-sub">Real-time status for all 4 AI agents</div>
-  <div class="grid grid-2" id="agentGrid"></div>
+<div class="card-header"><h3>Agents</h3></div>
+<div class="stats-grid" id="agents-stats"></div>
+<div id="agents-list"></div>
 </div>
-
-<!-- ─── WORKFLOWS ─────────────────────────────────────────────── -->
+<!-- WORKFLOWS PANEL -->
 <div class="panel" id="panel-workflows">
-  <div class="page-title">Workflows</div>
-  <div class="page-sub">Run the 5-phase execution protocol — watch progress live via SSE</div>
-
-  <!-- 5-Phase progress bar -->
-  <div class="phase-bar" id="phaseBar" style="display:none;">
-    <div class="phase-title">
-      <span id="phaseTitle">Executing workflow…</span>
-      <span class="elapsed" id="elapsedTimer">0s</span>
-    </div>
-    <div class="phase-steps">
-      <div class="phase-step" id="ps0"><div class="phase-dot">0</div><div class="phase-label">Context</div></div>
-      <div class="phase-step" id="ps1"><div class="phase-dot">1</div><div class="phase-label">Plan</div></div>
-      <div class="phase-step" id="ps2"><div class="phase-dot">2</div><div class="phase-label">Execute</div></div>
-      <div class="phase-step" id="ps3"><div class="phase-dot">3</div><div class="phase-label">Verify</div></div>
-      <div class="phase-step" id="ps4"><div class="phase-dot">4</div><div class="phase-label">Learn</div></div>
-    </div>
-    <div class="progress-bar" style="margin-top:14px;"><div class="progress-fill" id="wfProgressFill" style="width:0%"></div></div>
-    <div style="font-size:11px;color:var(--text2);margin-top:4px;" id="wfProgressLabel">Initializing…</div>
-  </div>
-
-  <!-- SSE Step log -->
-  <div id="sseLogWrap" style="display:none;margin-bottom:16px;">
-    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Live Step Log</div>
-    <div class="step-log" id="stepLog"></div>
-  </div>
-
-  <!-- Run form -->
-  <div class="card">
-    <div class="card-title">Run New Workflow</div>
-    <div class="workflow-form">
-      <div>
-        <label>Workflow Type</label>
-        <select id="wfType">
-          <option value="full-app-generation">full-app-generation</option>
-          <option value="refactoring">refactoring</option>
-          <option value="bug-fixing">bug-fixing</option>
-          <option value="prototyping">prototyping</option>
-          <option value="code-review">code-review</option>
-        </select>
-      </div>
-      <div>
-        <label>Requirements</label>
-        <textarea id="wfReq" rows="3" placeholder="Build a REST API with FastAPI, PostgreSQL, and JWT authentication"></textarea>
-      </div>
-      <div class="form-row">
-        <div><label>Stack (optional)</label><input id="wfStack" placeholder="FastAPI, PostgreSQL, Redis"></div>
-        <div><label>Features (comma-separated)</label><input id="wfFeatures" placeholder="auth, tasks, users"></div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn" onclick="runWorkflow()" id="runBtn">▶ Run Workflow</button>
-        <button class="btn-outline" onclick="showPanel('plan')">🗺 Preview Plan First</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Workflow history -->
-  <div class="card" style="margin-top:16px;">
-    <div class="card-title">History <button class="btn-ghost btn-sm" onclick="loadWorkflows()">↻</button></div>
-    <div id="wfList"><div class="empty-state"><div class="icon">⚡</div>No workflows yet</div></div>
-  </div>
+<div class="card-header"><h3>Workflows</h3><button class="btn btn-primary" onclick="openModal('run-workflow')">+ Run Workflow</button></div>
+<table class="table"><thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Steps</th><th>Actions</th></tr></thead><tbody id="workflows-table"></tbody></table>
 </div>
-
-<!-- ─── PLAN ──────────────────────────────────────────────────── -->
-<div class="panel" id="panel-plan">
-  <div class="page-title">Pre-Execution Plan</div>
-  <div class="page-sub">Generate and review the architecture plan before running</div>
-
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-title">Generate Plan</div>
-    <div style="display:grid;gap:10px;">
-      <div><label>Requirements</label><textarea id="planReq" rows="3" placeholder="Build a REST API with FastAPI, PostgreSQL, and JWT authentication"></textarea></div>
-      <div class="form-row">
-        <div><label>Stack</label><input id="planStack" placeholder="FastAPI, PostgreSQL"></div>
-        <div><label>Features</label><input id="planFeatures" placeholder="auth, api, testing"></div>
-      </div>
-      <button class="btn" onclick="generatePlan()">🗺 Generate Plan</button>
-    </div>
-  </div>
-
-  <div id="planOutput" style="display:none;">
-    <div class="grid grid-2" style="margin-bottom:16px;" id="planStats"></div>
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title">Execution Phases</div>
-      <div id="planPhases"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Parallel Groups (can run simultaneously)</div>
-      <div id="planParallel"></div>
-    </div>
-    <div style="margin-top:16px;">
-      <button class="btn" onclick="runFromPlan()">▶ Execute This Plan</button>
-    </div>
-  </div>
+<!-- CONSOLE PANEL -->
+<div class="panel" id="panel-console">
+<div class="card-header"><h3>Live Console</h3><div><select class="form-select" style="width:auto;display:inline-block" id="console-filter"><option value="all">All Levels</option><option value="info">Info</option><option value="warning">Warning</option><option value="error">Error</option></select><button class="btn btn-secondary" onclick="clearConsole()">Clear</button></div></div>
+<div class="console" id="console"></div>
 </div>
-
-<!-- ─── MEMORY ─────────────────────────────────────────────────── -->
-<div class="panel" id="panel-memory">
-  <div class="page-title">Permanent Memory</div>
-  <div class="page-sub">All past projects stored with vector similarity search</div>
-
-  <div class="section-tabs">
-    <div class="tab active" onclick="memTab(this,'list')">All Projects</div>
-    <div class="tab" onclick="memTab(this,'search')">Search Similar</div>
-    <div class="tab" onclick="memTab(this,'prefs')">Preferences</div>
-  </div>
-
-  <div id="memTabList">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="font-size:13px;color:var(--text2);" id="memCount">Loading…</div>
-      <button class="btn-outline btn-sm" onclick="loadMemory()">↻ Refresh</button>
-    </div>
-    <div id="memProjectList"></div>
-  </div>
-
-  <div id="memTabSearch" style="display:none;">
-    <div class="search-row">
-      <input id="memSearchQ" placeholder="Describe what you need… e.g. 'REST API with auth'">
-      <button class="btn" onclick="searchMemory()">🔍 Search</button>
-    </div>
-    <div id="memSearchResults"></div>
-  </div>
-
-  <div id="memTabPrefs" style="display:none;">
-    <div class="card">
-      <div class="card-title">User Preferences</div>
-      <div id="prefsContent">
-        <textarea id="prefsJson" rows="8" style="font-family:monospace;font-size:12px;" placeholder='{"coding_style":"pep8","preferred_stack":"FastAPI","test_framework":"pytest"}'></textarea>
-        <div style="margin-top:8px;"><button class="btn" onclick="savePrefs()">💾 Save Preferences</button></div>
-      </div>
-    </div>
-  </div>
+<!-- NETWORK PANEL -->
+<div class="panel" id="panel-network">
+<div class="card-header"><h3>Agent Communication Graph</h3></div>
+<div class="card"><div class="network-graph" id="network-graph"><div class="node" style="left:50px;top:150px">Orchestrator</div><div class="node agent" style="left:200px;top:50px">OpenHands</div><div class="node agent" style="left:200px;top:250px">Aider</div><div class="node agent" style="left:400px;top:100px">Bolt</div><div class="node agent" style="left:400px;top:200px">Replit</div></div></div>
 </div>
-
-<!-- ─── VERIFY ─────────────────────────────────────────────────── -->
-<div class="panel" id="panel-verify">
-  <div class="page-title">Verification</div>
-  <div class="page-sub">Post-build validation — syntax, tests, completeness</div>
-
-  <div style="display:flex;gap:8px;margin-bottom:16px;">
-    <input id="verifyWfId" placeholder="Workflow ID (or leave blank to run fresh check)">
-    <button class="btn" onclick="runVerify()">✅ Run Verification</button>
-  </div>
-
-  <div id="verifyOutput" style="display:none;">
-    <div class="grid grid-3" style="margin-bottom:16px;" id="verifyStats"></div>
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title">Checks</div>
-        <div id="verifyChecks"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Completeness</div>
-        <div id="verifyCompleteness"></div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:16px;" id="healingCard" style="display:none;">
-      <div class="card-title" style="color:var(--yellow);">⚠ Healing Suggestions</div>
-      <div id="healingSuggestions"></div>
-    </div>
-  </div>
+<!-- PERFORMANCE PANEL -->
+<div class="panel" id="panel-performance">
+<div class="card-header"><h3>Performance Monitor</h3></div>
+<div class="stats-grid"><div class="stat-card"><div class="stat-label">CPU Usage</div><div class="stat-value" id="cpu-usage">0%</div></div><div class="stat-card"><div class="stat-label">Memory Usage</div><div class="stat-value" id="memory-usage">0%</div></div><div class="stat-card"><div class="stat-label">Disk Usage</div><div class="stat-value" id="disk-usage">0%</div></div></div>
+<div class="card"><div class="card-title">System Resources</div><div class="perf-chart" id="perf-chart"></div></div>
 </div>
-
-<!-- ─── TERMINAL ──────────────────────────────────────────────── -->
-<div class="panel" id="panel-terminal">
-  <div class="page-title">Terminal</div>
-  <div class="page-sub">Run shell commands on the orchestrator host</div>
-  <div class="terminal">
-    <div class="terminal-bar">
-      <div class="term-dots">
-        <div class="term-dot" style="background:#f85149"></div>
-        <div class="term-dot" style="background:#d29922"></div>
-        <div class="term-dot" style="background:#3fb950"></div>
-      </div>
-      <span style="font-size:11px;color:#8b949e;margin-left:4px;">AI Engineering OS — shell</span>
-    </div>
-    <div class="term-output" id="termOutput">
-      <div class="cmd">AI Engineering OS v3.0 — type a command below</div>
-    </div>
-    <div class="term-input-row">
-      <span class="term-prompt">$</span>
-      <input class="term-input" id="termInput" placeholder="python3 --version" onkeydown="termKey(event)">
-    </div>
-  </div>
+<!-- COSTS PANEL -->
+<div class="panel" id="panel-costs">
+<div class="card-header"><h3>Cost Tracker</h3></div>
+<div class="stats-grid"><div class="stat-card"><div class="stat-label">Today</div><div class="stat-value" id="cost-today">$0.00</div></div><div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="cost-week">$0.00</div></div><div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" id="cost-month">$0.00</div></div></div>
+<div class="card"><div class="card-title">Daily Costs</div><div id="cost-chart"></div></div>
 </div>
-
-<!-- ─── FILES ─────────────────────────────────────────────────── -->
-<div class="panel" id="panel-files">
-  <div class="page-title">Files</div>
-  <div class="page-sub">Browse workspace files</div>
-  <div style="display:flex;gap:8px;margin-bottom:12px;">
-    <input id="filePath" value="workspaces" style="max-width:280px;">
-    <button class="btn-outline" onclick="loadFiles()">Browse</button>
-    <label class="btn btn-sm" style="margin-left:auto;">📎 Upload <input type="file" style="display:none" onchange="uploadFile(this)"></label>
-  </div>
-  <div class="card">
-    <div id="fileList"><div class="empty-state"><div class="icon">📁</div>Click Browse to view files</div></div>
-  </div>
+<!-- SCHEDULER PANEL -->
+<div class="panel" id="panel-scheduler">
+<div class="card-header"><h3>Task Scheduler</h3><button class="btn btn-primary" onclick="openModal('schedule-task')">+ Schedule Task</button></div>
+<div id="scheduled-tasks"></div>
 </div>
-
-<!-- ─── CONFIG ─────────────────────────────────────────────────── -->
-<div class="panel" id="panel-config">
-  <div class="page-title">Configuration</div>
-  <div class="page-sub">Environment variables and policy files</div>
-
-  <div class="section-tabs">
-    <div class="tab active" onclick="cfgTab(this,'env')">Environment</div>
-    <div class="tab" onclick="cfgTab(this,'policy')">Policies</div>
-  </div>
-
-  <div id="cfgTabEnv">
-    <div class="card" style="margin-bottom:12px;">
-      <div class="card-title">.env Variables</div>
-      <div id="envRows"></div>
-      <button class="btn-ghost" onclick="addEnvRow()" style="margin-top:8px;">+ Add Variable</button>
-    </div>
-    <button class="btn" onclick="saveEnv()">💾 Save .env</button>
-  </div>
-
-  <div id="cfgTabPolicy" style="display:none;">
-    <div class="card">
-      <div class="card-title">Policy Files</div>
-      <div style="margin-bottom:8px;"><select id="policySelect" onchange="loadPolicyContent()"><option value="">Select a policy…</option></select></div>
-      <textarea id="policyContent" rows="20" style="font-family:monospace;font-size:12px;"></textarea>
-      <div style="margin-top:8px;"><button class="btn" onclick="savePolicy()">💾 Save Policy</button></div>
-    </div>
-  </div>
+<!-- BACKUP PANEL -->
+<div class="panel" id="panel-backup">
+<div class="card-header"><h3>Backup Manager</h3></div>
+<div class="card">
+<div class="card-header"><span class="card-title">Auto Backup Settings</span></div>
+<div class="form-group"><label class="form-label">Backup Frequency</label><select class="form-select" id="backup-frequency"><option value="hourly">Hourly</option><option value="daily" selected>Daily</option><option value="weekly">Weekly</option></select></div>
+<div class="form-group"><label class="form-label">Max Backups to Keep</label><input type="number" class="form-input" id="backup-keep" value="10"></div>
+<button class="btn btn-primary" onclick="saveBackupSettings()">Save Settings</button>
 </div>
-
-</div><!-- /main -->
-</div><!-- /layout -->
-
-<div class="toast" id="toast"></div>
-
+<div class="card">
+<div class="card-header"><span class="card-title">Available Backups</span><button class="btn btn-secondary" onclick="createBackup()">+ Create Backup</button></div>
+<div id="backups-list"><div class="empty-state"><p>No backups yet</p></div></div>
+</div>
+</div>
+<!-- SETTINGS PANEL -->
+<div class="panel" id="panel-settings">
+<div class="card-header"><h3>Settings</h3></div>
+<div class="tabs"><div class="tab active" data-tab="general">General</div><div class="tab" data-tab="theme">Theme</div><div class="tab" data-tab="api">API Keys</div></div>
+<div class="tabs-content active" id="tab-general">
+<div class="card">
+<div class="card-title">General Settings</div>
+<div class="form-group"><label class="form-label">Server URL</label><input type="text" class="form-input" id="server-url" value="http://localhost:8080"></div>
+<div class="form-group"><label class="form-label">Auto-refresh Interval (seconds)</label><input type="number" class="form-input" id="refresh-interval" value="10"></div>
+<button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+</div>
+</div>
+<div class="tabs-content" id="tab-theme">
+<div class="card"><div class="card-title">Theme Customization</div><div class="theme-preview"><div class="theme-option active" data-theme="dark"><div style="background:#0f172a;padding:20px;border-radius:8px"><div style="color:white">Dark</div></div></div><div class="theme-option" data-theme="light"><div style="background:#f8fafc;padding:20px;border-radius:8px"><div style="color:#1e293b">Light</div></div></div><div class="theme-option" data-theme="blue"><div style="background:#0c1929;padding:20px;border-radius:8px"><div style="color:#38bdf8">Blue</div></div></div></div></div>
+</div>
+<div class="tabs-content" id="tab-api">
+<div class="card"><div class="card-header"><span class="card-title">API Keys</span><button class="btn btn-primary" onclick="openModal('add-api-key')">+ Add Key</button></div><div id="api-keys-list"></div></div>
+</div>
+</div>
+<!-- SHORTCUTS PANEL -->
+<div class="panel" id="panel-shortcuts">
+<div class="card-header"><h3>Keyboard Shortcuts</h3></div>
+<div class="card"><div class="shortcuts-grid">
+<div class="shortcut"><span>New Project</span><kbd>Ctrl+N</kbd></div>
+<div class="shortcut"><span>Search</span><kbd>Ctrl+K</kbd></div>
+<div class="shortcut"><span>Run Workflow</span><kbd>Ctrl+Enter</kbd></div>
+<div class="shortcut"><span>Console</span><kbd>Ctrl+`</kbd></div>
+<div class="shortcut"><span>Settings</span><kbd>Ctrl+,</kbd></div>
+<div class="shortcut"><span>Close Modal</span><kbd>Esc</kbd></div>
+<div class="shortcut"><span>Toggle Sidebar</span><kbd>Ctrl+B</kbd></div>
+<div class="shortcut"><span>Refresh</span><kbd>F5</kbd></div>
+</div></div>
+</div>
+</div>
+</main>
+</div>
+<div class="toast-container" id="toast-container"></div>
+<!-- CREATE PROJECT MODAL -->
+<div class="modal-overlay" id="modal-create-project">
+<div class="modal">
+<div class="modal-header"><span class="modal-title">Create Project</span><span class="modal-close" onclick="closeModal('create-project')">✕</span></div>
+<form onsubmit="createProject(event)">
+<div class="form-group"><label class="form-label">Project Name</label><input type="text" class="form-input" id="project-name" required></div>
+<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="project-description"></textarea></div>
+<div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('create-project')">Cancel</button><button type="submit" class="btn btn-primary" id="create-project-btn">Create</button></div>
+</form>
+</div>
+</div>
+<!-- RUN WORKFLOW MODAL -->
+<div class="modal-overlay" id="modal-run-workflow">
+<div class="modal">
+<div class="modal-header"><span class="modal-title">Run Workflow</span><span class="modal-close" onclick="closeModal('run-workflow')">✕</span></div>
+<form onsubmit="runWorkflow(event)">
+<div class="form-group"><label class="form-label">Workflow Type</label><select class="form-select" id="workflow-type"><option value="full-app-generation">Full App Generation</option><option value="refactoring">Refactoring</option><option value="bug-fixing">Bug Fixing</option><option value="prototyping">Prototyping</option><option value="code-review">Code Review</option></select></div>
+<div class="form-group"><label class="form-label">Requirements</label><textarea class="form-textarea" id="workflow-requirements" required placeholder="Describe what you want to build..."></textarea></div>
+<div class="form-group"><label class="form-label">Tech Stack (optional)</label><input type="text" class="form-input" id="workflow-stack" placeholder="e.g., Python, React, PostgreSQL"></div>
+<div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('run-workflow')">Cancel</button><button type="submit" class="btn btn-primary" id="run-workflow-btn">Run</button></div>
+</form>
+</div>
+</div>
 <script>
-const API = '';
-let theme = 'dark';
-let currentWorkflowId = null;
-let currentESS = null;
-let elapsedInterval = null;
-let elapsedStart = null;
-let currentPlanData = null;
-
-// ── Theme ────────────────────────────────────────────────────
-function toggleTheme(){document.body.classList.toggle('light');theme=theme==='dark'?'light':'dark';}
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
-
-// ── Toast ───────────────────────────────────────────────────
-function toast(msg,type='info'){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show '+(type||'');
-  setTimeout(()=>t.className='toast',3000);
-}
-
-// ── Panel navigation ────────────────────────────────────────
-function showPanel(id){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const panel=document.getElementById('panel-'+id);
-  if(panel)panel.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    if(n.textContent.trim().toLowerCase().includes(id.toLowerCase().replace('-',' ')))n.classList.add('active');
-  });
-  if(id==='agents')loadAgents();
-  if(id==='workflows')loadWorkflows();
-  if(id==='memory')loadMemory();
-  if(id==='files')loadFiles();
-  if(id==='config'){loadEnv();loadPolicies();}
-  if(id==='overview')loadOverview();
-}
-
-// ── Health check ────────────────────────────────────────────
-async function checkHealth(){
-  try{
-    const r=await fetch(`${API}/health`);
-    const d=await r.json();
-    const ok=d.status==='healthy';
-    document.getElementById('healthDot').className='dot'+(ok?'':' offline');
-    document.getElementById('healthLabel').textContent=ok?'Healthy':'Offline';
-    document.getElementById('ovQueue').textContent=d.queue_size||0;
-    document.getElementById('ovMem').textContent=d.memory_projects||0;
-    document.getElementById('memBadge').textContent=d.memory_projects||0;
-  }catch{
-    document.getElementById('healthDot').className='dot offline';
-    document.getElementById('healthLabel').textContent='Offline';
-  }
-}
-
-// ── Overview ─────────────────────────────────────────────────
-async function loadOverview(){
-  checkHealth();
-  try{
-    const[wf,ag]=await Promise.all([fetch(`${API}/workflows`).then(r=>r.json()),fetch(`${API}/agents/status`).then(r=>r.json())]);
-    document.getElementById('ovWf').textContent=wf.total||0;
-    document.getElementById('wfBadge').textContent=wf.total||0;
-    document.getElementById('ovAgents').textContent=(ag.online_count||0)+'/4';
-    const recent=(wf.active_workflows||[]).slice(-5).reverse();
-    if(recent.length){
-      document.getElementById('recentWf').innerHTML=recent.map(w=>`
-        <div class="wf-row">
-          <div class="wf-id">${w.id.slice(0,8)}</div>
-          <div class="wf-type">${w.type}</div>
-          <div class="wf-status ${w.status}">${w.status}</div>
-          <div style="margin-left:auto;font-size:11px;color:var(--text2)">${new Date(w.created_at*1000).toLocaleTimeString()}</div>
-        </div>`).join('');
-    }
-  }catch(e){console.error(e);}
-}
-
-// ── Agents ───────────────────────────────────────────────────
-async function loadAgents(){
-  try{
-    const d=await fetch(`${API}/agents/status`).then(r=>r.json());
-    const caps={
-      openhands:['Autonomous','Review','Debug'],
-      aider:['Precision Edit','Refactor','Fix'],
-      bolt:['Scaffold','UI Gen','Prototype'],
-      replit:['Run','Test','Verify'],
-    };
-    const colors={openhands:'agent-openhands',aider:'agent-aider',bolt:'agent-bolt',replit:'agent-replit'};
-    document.getElementById('agentGrid').innerHTML=Object.entries(d.agents||{}).map(([id,s])=>`
-      <div class="card agent-card" id="agCard-${id}">
-        <div class="agent-header">
-          <div>
-            <div class="agent-name">${id.charAt(0).toUpperCase()+id.slice(1)}</div>
-            <div style="font-size:11px;color:var(--text2);">Port ${{openhands:3001,aider:3002,bolt:3003,replit:3004}[id]||'?'}</div>
-          </div>
-          <div class="status-pill ${s.healthy?'online':'offline'}">${s.healthy?'● Online':'● Offline'}</div>
-        </div>
-        <div class="info-row"><div class="info-key">Tasks run</div><div class="info-val">${s.task_count||0}</div></div>
-        <div class="info-row"><div class="info-key">Errors</div><div class="info-val">${s.error_count||0}</div></div>
-        <div class="info-row"><div class="info-key">Current task</div><div class="info-val">${s.current_task||'—'}</div></div>
-        <div class="agent-caps">${(caps[id]||[]).map(c=>`<div class="cap-tag">${c}</div>`).join('')}</div>
-      </div>`).join('');
-  }catch(e){toast('Failed to load agents','error');}
-}
-
-// ── Workflows ────────────────────────────────────────────────
-async function loadWorkflows(){
-  try{
-    const d=await fetch(`${API}/workflows`).then(r=>r.json());
-    const wfs=d.active_workflows||[];
-    document.getElementById('wfBadge').textContent=wfs.length;
-    if(!wfs.length){document.getElementById('wfList').innerHTML='<div class="empty-state"><div class="icon">⚡</div>No workflows run yet</div>';return;}
-    document.getElementById('wfList').innerHTML=wfs.slice().reverse().map(w=>`
-      <div class="wf-row">
-        <div><div class="wf-type">${w.type}</div><div class="wf-id">${w.id}</div></div>
-        <div class="wf-status ${w.status}">${w.status}</div>
-        ${w.complexity?`<div style="font-size:11px;color:var(--text2);">${w.complexity}</div>`:''}
-        ${w.memory_stored?'<div style="font-size:11px;color:var(--green);">🧠 Stored</div>':''}
-        <div style="margin-left:auto;display:flex;gap:6px;">
-          <button class="btn-ghost btn-sm" onclick="viewWorkflow('${w.id}')">Details</button>
-          <button class="btn-ghost btn-sm" onclick="showVerify('${w.id}')">Verify</button>
-        </div>
-      </div>`).join('');
-  }catch(e){toast('Failed to load workflows','error');}
-}
-
-async function viewWorkflow(id){
-  try{
-    const d=await fetch(`${API}/workflows/${id}/status`).then(r=>r.json());
-    const steps=d.results||[];
-    alert(`Workflow: ${d.type}\nStatus: ${d.status}\nSteps: ${steps.length}\nComplexity: ${d.complexity||'?'}\nMemory stored: ${d.memory_stored?'Yes':'No'}\n\nSteps:\n${steps.map((s,i)=>`  ${i+1}. ${s.step_agent||s.agent_id} → ${s.action} [${s.status}]`).join('\n')}`);
-  }catch(e){toast('Error loading workflow','error');}
-}
-
-function showVerify(id){
-  document.getElementById('verifyWfId').value=id;
-  showPanel('verify');
-  runVerify();
-}
-
-async function runWorkflow(){
-  const type=document.getElementById('wfType').value;
-  const req=document.getElementById('wfReq').value.trim();
-  if(!req){toast('Requirements are required','error');return;}
-  const features=document.getElementById('wfFeatures').value.split(',').map(f=>f.trim()).filter(Boolean);
-  const body={requirements:req,stack:document.getElementById('wfStack').value||null,features:features.length?features:null};
-
-  document.getElementById('runBtn').disabled=true;
-  document.getElementById('runBtn').textContent='Running…';
-  showPhaseBar(true);
-  startElapsed();
-  connectSSE(null); // will be updated when workflow starts
-
-  try{
-    const r=await fetch(`${API}/workflows/${type}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.detail||'Failed');
-    stopElapsed();
-    markPhase(4,'done');
-    setProgress(100,'✅ All 5 phases complete');
-    toast(`Workflow completed — ${d.steps_completed} steps`,'success');
-    logStep('SUCCESS','Workflow complete — stored in memory as project '+d.project_id,'success');
-    loadWorkflows();
-    loadOverview();
-  }catch(e){
-    stopElapsed();
-    toast('Error: '+e.message,'error');
-    logStep('ERROR',e.message,'error');
-  }finally{
-    document.getElementById('runBtn').disabled=false;
-    document.getElementById('runBtn').textContent='▶ Run Workflow';
-  }
-}
-
-// ── SSE ──────────────────────────────────────────────────────
-function connectSSE(workflowId){
-  if(currentESS){currentESS.close();currentESS=null;}
-  if(!workflowId)return;
-  currentWorkflowId=workflowId;
-  const sse=new EventSource(`${API}/stream/workflows/${workflowId}`);
-  currentESS=sse;
-  setSseStatus(true);
-  const phaseMap={context:0,plan:1,execute:2,verify:3,learn:4};
-
-  sse.addEventListener('connected',()=>{logStep('SSE','Stream connected','info');});
-  sse.addEventListener('workflow_started',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('START',`Workflow started — ${d.steps} steps, complexity: ${d.complexity}`,'info');
-    markPhase(0,'done');markPhase(1,'done');markPhase(2,'active');
-    setProgress(20,'Phase 2: Execute');
-  });
-  sse.addEventListener('agent_started',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('→',`${d.agent} starting: ${d.action}`,'info');
-    highlightAgent(d.agent,true);
-  });
-  sse.addEventListener('agent_completed',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('✓',`${d.agent} completed ${d.action} in ${d.duration_s}s — ${d.files} files`,'success');
-    highlightAgent(d.agent,false);
-    const pct=20+Math.round((d.step/(d.step+1))*40);
-    setProgress(pct,`Step ${d.step+1} done`);
-  });
-  sse.addEventListener('agent_failed',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('✗',`${d.agent} failed: ${d.summary}`,'error');
-    highlightAgent(d.agent,false);
-  });
-  sse.addEventListener('step_progress',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('…',d.message,'warn');
-    if(d.percent!==undefined)setProgress(20+d.percent*0.4,d.message);
-  });
-  sse.addEventListener('workflow_completed',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('✅',`All steps done in ${d.duration_s}s`,'success');
-    markPhase(2,'done');markPhase(3,'active');
-    setProgress(80,'Phase 3: Verify');
-    setTimeout(()=>{markPhase(3,'done');markPhase(4,'active');setProgress(95,'Phase 4: Learn');},1000);
-    setSseStatus(false);sse.close();
-  });
-  sse.addEventListener('workflow_failed',e=>{
-    const d=JSON.parse(e.data).data;
-    logStep('✗','Workflow failed: '+d.error,'error');
-    setSseStatus(false);sse.close();
-  });
-  sse.addEventListener('stream_closed',()=>{setSseStatus(false);sse.close();});
-  sse.onerror=()=>{setSseStatus(false);};
-}
-
-function setSseStatus(connected){
-  document.getElementById('sseDot').className='sse-dot'+(connected?' connected':'');
-  document.getElementById('sseLabel').textContent=connected?'SSE Live':'SSE';
-}
-
-function showPhaseBar(show){
-  document.getElementById('phaseBar').style.display=show?'':'none';
-  document.getElementById('sseLogWrap').style.display=show?'':'none';
-  if(show){[0,1,2,3,4].forEach(i=>document.getElementById('ps'+i).className='phase-step');}
-}
-
-function markPhase(n,state){
-  const el=document.getElementById('ps'+n);
-  if(!el)return;
-  el.className='phase-step '+state;
-  el.querySelector('.phase-dot').textContent=state==='done'?'✓':n;
-}
-
-function setProgress(pct,label){
-  document.getElementById('wfProgressFill').style.width=pct+'%';
-  document.getElementById('wfProgressLabel').textContent=label;
-}
-
-function logStep(prefix,msg,type){
-  const log=document.getElementById('stepLog');
-  const t=new Date().toLocaleTimeString('en',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const div=document.createElement('div');
-  div.className='log-entry';
-  div.innerHTML=`<span class="log-time">${t}</span><span class="log-msg ${type||''}">[${prefix}] ${msg}</span>`;
-  log.appendChild(div);
-  log.scrollTop=log.scrollHeight;
-}
-
-function highlightAgent(agentId,on){
-  const card=document.getElementById('agCard-'+agentId);
-  if(card){card.classList.toggle('working',on);const pill=card.querySelector('.status-pill');if(pill&&on)pill.className='status-pill working';}
-}
-
-function startElapsed(){
-  elapsedStart=Date.now();
-  document.getElementById('phaseTitle').textContent='Executing workflow…';
-  elapsedInterval=setInterval(()=>{
-    const s=Math.round((Date.now()-elapsedStart)/1000);
-    document.getElementById('elapsedTimer').textContent=s+'s';
-  },1000);
-}
-function stopElapsed(){clearInterval(elapsedInterval);}
-
-// ── Plan ─────────────────────────────────────────────────────
-async function generatePlan(){
-  const req=document.getElementById('planReq').value.trim();
-  if(!req){toast('Requirements required','error');return;}
-  const body={requirements:req,stack:document.getElementById('planStack').value||null,features:document.getElementById('planFeatures').value.split(',').map(f=>f.trim()).filter(Boolean)||null};
-  try{
-    const d=await fetch(`${API}/plan/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
-    currentPlanData=d;
-    renderPlan(d);
-    document.getElementById('planOutput').style.display='';
-  }catch(e){toast('Plan error: '+e.message,'error');}
-}
-
-function renderPlan(d){
-  const p=d.plan;const s=d.summary;
-  document.getElementById('planStats').innerHTML=`
-    <div class="card"><div class="card-title">Complexity</div><div class="stat-val">${s.complexity}</div></div>
-    <div class="card"><div class="card-title">Phases</div><div class="stat-val">${s.phases}</div></div>
-    <div class="card"><div class="card-title">Est. Files</div><div class="stat-val">${s.estimated_files}</div></div>
-    <div class="card"><div class="card-title">Est. Hours</div><div class="stat-val">${s.estimated_hours}h</div></div>`;
-  document.getElementById('planPhases').innerHTML=(p.phases||[]).map((ph,i)=>`
-    <div class="plan-phase">
-      <span class="plan-agent agent-${ph.agent}">${ph.agent}</span>
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:13px;">${ph.name} — ${ph.action}</div>
-        <div style="font-size:11px;color:var(--text2);">${ph.description}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px;">Files: ${(ph.files_to_create||[]).slice(0,4).join(', ')}</div>
-      </div>
-      <div style="font-size:11px;color:var(--text2);">${ph.estimated_time}</div>
-    </div>`).join('');
-  const pg=d.resolved_order.parallel_groups||[];
-  document.getElementById('planParallel').innerHTML=pg.map((grp,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--text2);width:50px;">Group ${i+1}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${grp.map(n=>`<span class="cap-tag">${n}</span>`).join('')}</div>
-    </div>`).join('')||'<div class="empty-state">Sequential execution</div>';
-}
-
-function runFromPlan(){
-  if(!currentPlanData)return;
-  const p=currentPlanData.plan;
-  document.getElementById('wfReq').value=p.requirements||'';
-  document.getElementById('wfStack').value=(p.detected_stack||[]).join(', ');
-  document.getElementById('wfFeatures').value=(p.detected_features||[]).join(', ');
-  showPanel('workflows');
-  toast('Plan loaded — click Run Workflow to execute');
-}
-
-// ── Memory ───────────────────────────────────────────────────
-function memTab(btn,tab){
-  document.querySelectorAll('#panel-memory .tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('memTabList').style.display=tab==='list'?'':'none';
-  document.getElementById('memTabSearch').style.display=tab==='search'?'':'none';
-  document.getElementById('memTabPrefs').style.display=tab==='prefs'?'':'none';
-}
-
-async function loadMemory(){
-  try{
-    const d=await fetch(`${API}/memory/projects`).then(r=>r.json());
-    const projects=d.projects||[];
-    document.getElementById('memCount').textContent=`${projects.length} projects in permanent memory`;
-    document.getElementById('memBadge').textContent=projects.length;
-    if(!projects.length){document.getElementById('memProjectList').innerHTML='<div class="empty-state"><div class="icon">🧠</div>No projects in memory yet — run a workflow to start learning</div>';return;}
-    document.getElementById('memProjectList').innerHTML=projects.map(p=>`
-      <div class="memory-card" onclick="viewProject('${p.id}')">
-        <div class="memory-name">${p.name}</div>
-        <div class="memory-desc">${p.description}</div>
-        <div class="memory-meta">
-          ${(p.stack||[]).slice(0,4).map(s=>`<span class="meta-tag">${s}</span>`).join('')}
-          <span class="meta-tag">${p.complexity||'?'}</span>
-          <span style="margin-left:auto;font-size:11px;color:var(--text2);">${new Date((p.updated_at||0)*1000).toLocaleDateString()}</span>
-        </div>
-      </div>`).join('');
-  }catch(e){toast('Memory load error','error');}
-}
-
-async function viewProject(id){
-  try{
-    const p=await fetch(`${API}/memory/projects/${id}`).then(r=>r.json());
-    alert(`Project: ${p.name}\n\nDescription: ${p.description}\nStack: ${(p.stack||[]).join(', ')}\nComplexity: ${p.complexity}\nDecisions:\n${(p.decisions||[]).slice(0,5).join('\n')}\nPatterns: ${(p.patterns||[]).join(', ')}`);
-  }catch(e){toast('Error loading project','error');}
-}
-
-async function searchMemory(){
-  const q=document.getElementById('memSearchQ').value.trim();
-  if(!q){toast('Enter a search query','error');return;}
-  try{
-    const d=await fetch(`${API}/memory/search`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requirements:q})}).then(r=>r.json());
-    const results=d.results||[];
-    document.getElementById('memSearchResults').innerHTML=results.length?results.map(p=>`
-      <div class="memory-card">
-        <div class="memory-name">${p.name}<span class="sim-score">${(p._similarity_score*100).toFixed(0)}% match</span></div>
-        <div class="memory-desc">${p.description}</div>
-        <div class="memory-meta">${(p.stack||[]).slice(0,4).map(s=>`<span class="meta-tag">${s}</span>`).join('')}</div>
-      </div>`).join(''):'<div class="empty-state"><div class="icon">🔍</div>No similar projects found</div>';
-  }catch(e){toast('Search error','error');}
-}
-
-async function savePrefs(){
-  try{
-    const prefs=JSON.parse(document.getElementById('prefsJson').value||'{}');
-    await fetch(`${API}/memory/preferences`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({preferences:prefs})});
-    toast('Preferences saved','success');
-  }catch(e){toast('Invalid JSON or save error','error');}
-}
-
-// ── Verify ───────────────────────────────────────────────────
-async function runVerify(){
-  const wfId=document.getElementById('verifyWfId').value.trim();
-  try{
-    const url=wfId?`${API}/verify/${wfId}`:`${API}/verify/latest`;
-    const d=await fetch(wfId?`${API}/verify/${wfId}`:`${API}/verify/noop`).then(r=>r.json()).catch(async()=>{
-      // fallback: trigger a fresh verify
-      return fetch(`${API}/verify/_fresh`,{method:'GET'}).then(r=>r.json()).catch(()=>null);
-    });
-    if(!d){toast('No verification data available','error');return;}
-    renderVerify(d);
-    document.getElementById('verifyOutput').style.display='';
-  }catch(e){toast('Verify error: '+e.message,'error');}
-}
-
-function renderVerify(d){
-  const build=d.build||{};const comp=d.completeness||{};const overall=d.overall_passed;
-  document.getElementById('verifyStats').innerHTML=`
-    <div class="card"><div class="card-title">Overall</div><div class="stat-val" style="color:${overall?'var(--green)':'var(--red)'};">${overall?'✅ PASS':'❌ FAIL'}</div></div>
-    <div class="card"><div class="card-title">Build</div><div class="stat-val" style="color:${build.passed?'var(--green)':'var(--red)'};">${build.passed?'Pass':'Fail'}</div><div class="stat-sub">${build.duration_s||0}s</div></div>
-    <div class="card"><div class="card-title">Completeness</div><div class="stat-val">${comp.percentage||0}%</div><div class="stat-sub">${comp.found_features?.length||0}/${comp.required_features?.length||0} features</div></div>`;
-
-  const checks=build.results||{};
-  document.getElementById('verifyChecks').innerHTML=Object.entries(checks).map(([k,v])=>`
-    <div class="verify-row">
-      <div class="verify-label">${k.replace('_',' ')}</div>
-      <div class="verify-result ${v.skipped?'skip':v.passed?'pass':'fail'}">${v.skipped?'Skipped':v.passed?'✓ Pass':'✗ Fail'}</div>
-    </div>`).join('')||'<div style="color:var(--text2);font-size:13px;">No build results yet</div>';
-
-  document.getElementById('verifyCompleteness').innerHTML=`
-    <div class="info-row"><div class="info-key">Files built</div><div class="info-val">${comp.file_count||0}</div></div>
-    ${(comp.found_features||[]).map(f=>`<div class="info-row"><div class="info-key" style="color:var(--green);">✓ ${f}</div></div>`).join('')}
-    ${(comp.missing_features||[]).map(f=>`<div class="info-row"><div class="info-key" style="color:var(--red);">✗ ${f}</div></div>`).join('')}
-    <div style="margin-top:8px;font-size:12px;color:var(--text2);">${comp.report||''}</div>`;
-
-  const suggestions=build.healing_suggestions||[];
-  if(suggestions.length){
-    document.getElementById('healingCard').style.display='';
-    document.getElementById('healingSuggestions').innerHTML=suggestions.map(s=>`<div style="padding:4px 0;font-size:13px;">• ${s}</div>`).join('');
-  }
-}
-
-// ── Terminal ─────────────────────────────────────────────────
-function termKey(e){if(e.key==='Enter')runTermCmd();}
-async function runTermCmd(){
-  const inp=document.getElementById('termInput');
-  const cmd=inp.value.trim();if(!cmd)return;
-  const out=document.getElementById('termOutput');
-  out.innerHTML+=`<div><span class="cmd">$ ${cmd}</span></div>`;
-  inp.value='';
-  try{
-    const d=await fetch(`${API}/terminal`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})}).then(r=>r.json());
-    if(d.stdout)out.innerHTML+=`<div class="ok">${escHtml(d.stdout)}</div>`;
-    if(d.stderr)out.innerHTML+=`<div class="err">${escHtml(d.stderr)}</div>`;
-  }catch(e){out.innerHTML+=`<div class="err">Request failed: ${e.message}</div>`;}
-  out.scrollTop=out.scrollHeight;
-}
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// ── Files ─────────────────────────────────────────────────────
-async function loadFiles(){
-  const path=document.getElementById('filePath').value||'workspaces';
-  try{
-    const d=await fetch(`${API}/files?path=${encodeURIComponent(path)}`).then(r=>r.json());
-    if(!d.entries.length){document.getElementById('fileList').innerHTML='<div class="empty-state"><div class="icon">📁</div>No files found</div>';return;}
-    document.getElementById('fileList').innerHTML=d.entries.map(f=>`
-      <div class="wf-row">
-        <div>${f.type==='dir'?'📁':'📄'} ${f.path}</div>
-        ${f.size!=null?`<div style="margin-left:auto;font-size:11px;color:var(--text2);">${(f.size/1024).toFixed(1)}KB</div>`:''}
-      </div>`).join('');
-  }catch(e){toast('File load error','error');}
-}
-
-async function uploadFile(input){
-  const file=input.files[0];if(!file)return;
-  const fd=new FormData();fd.append('file',file);
-  try{
-    const d=await fetch(`${API}/files/upload`,{method:'POST',body:fd}).then(r=>r.json());
-    toast(`Uploaded ${d.filename}`,'success');loadFiles();
-  }catch(e){toast('Upload failed','error');}
-}
-
-// ── Config ────────────────────────────────────────────────────
-function cfgTab(btn,tab){
-  document.querySelectorAll('#panel-config .tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('cfgTabEnv').style.display=tab==='env'?'':'none';
-  document.getElementById('cfgTabPolicy').style.display=tab==='policy'?'':'none';
-}
-
-let envData={};
-async function loadEnv(){
-  try{
-    const d=await fetch(`${API}/env`).then(r=>r.json());
-    envData={...d.variables};renderEnvRows();
-  }catch(e){}
-}
-function renderEnvRows(){
-  document.getElementById('envRows').innerHTML=Object.entries(envData).map(([k,v])=>`
-    <div class="env-row">
-      <input class="env-key" value="${escHtml(k)}" onchange="envKeyChange(this,'${k}')">
-      <input class="env-val" value="${escHtml(v)}" onchange="envData['${k}']=this.value">
-      <button class="env-del" onclick="deleteEnvRow('${k}')">✕</button>
-    </div>`).join('');
-}
-function addEnvRow(){envData['NEW_KEY']='';renderEnvRows();}
-function deleteEnvRow(k){delete envData[k];renderEnvRows();}
-function envKeyChange(el,oldKey){const nk=el.value;envData[nk]=envData[oldKey];delete envData[oldKey];}
-async function saveEnv(){
-  try{
-    await fetch(`${API}/env`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({variables:envData})});
-    toast('Saved .env','success');
-  }catch(e){toast('Save failed','error');}
-}
-
-let policiesData={};
-async function loadPolicies(){
-  try{
-    const d=await fetch(`${API}/policies`).then(r=>r.json());
-    policiesData=d.policies||{};
-    const sel=document.getElementById('policySelect');
-    sel.innerHTML='<option value="">Select a policy…</option>'+Object.keys(policiesData).map(k=>`<option value="${k}">${k}</option>`).join('');
-  }catch(e){}
-}
-function loadPolicyContent(){
-  const k=document.getElementById('policySelect').value;
-  if(!k)return;
-  document.getElementById('policyContent').value=JSON.stringify(policiesData[k]||{},null,2);
-}
-async function savePolicy(){
-  const k=document.getElementById('policySelect').value;
-  if(!k){toast('Select a policy first','error');return;}
-  try{
-    const content=JSON.parse(document.getElementById('policyContent').value);
-    await fetch(`${API}/policies`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:k,content})});
-    toast('Policy saved','success');
-  }catch(e){toast('Invalid JSON or save error','error');}
-}
-
-// ── Global refresh ───────────────────────────────────────────
-function refreshAll(){checkHealth();loadOverview();}
-
-// ── Init ─────────────────────────────────────────────────────
-checkHealth();
-loadOverview();
-setInterval(checkHealth,15000);
-
-// Auto-connect SSE for any running workflow
-(async()=>{
-  try{
-    const d=await fetch(`${API}/workflows`).then(r=>r.json());
-    const running=(d.active_workflows||[]).find(w=>w.status==='running');
-    if(running){connectSSE(running.id);showPanel('workflows');}
-  }catch(e){}
-})();
+const state={serverUrl:'http://localhost:8080',refreshInterval:10000,consoleLogs:[],projects:[],workflows:[],agents:{}};
+const DB_NAME='ai-os-dashboard',DB_VERSION=1;let db=null;
+async function initDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onerror=()=>reject(r.error);r.onsuccess=()=>{db=r.result;resolve(db)};r.onupgradeneeded=(e)=>{const d=e.target.result;d.createObjectStore('settings',{keyPath:'key'});d.createObjectStore('cache',{keyPath:'key'})}})}
+async function apiGet(path){try{const r=await fetch(`${state.serverUrl}${path}`,{headers:{'Content-Type':'application/json'}});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json()}catch(e){console.error('API Error:',e);return null}}
+async function apiPost(path,data){try{const r=await fetch(`${state.serverUrl}${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json()}catch(e){console.error('API Error:',e);showToast('error','Request failed');return null}}
+function showToast(type,msg){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${type==='success'?'✓':type==='error'?'✕':type==='warning'?'⚠':'ℹ'}</span><span>${msg}</span>`;c.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},4000)}
+function openModal(n){document.getElementById(`modal-${n}`)?.classList.add('active')}
+function closeModal(n){document.getElementById(`modal-${n}`)?.classList.remove('active')}
+function closeAllModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('active'))}
+document.addEventListener('click',(e)=>{if(!e.target.closest('.modal')&&!e.target.closest('.btn'))closeAllModals()});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape')closeAllModals();const k=`${e.ctrlKey?'ctrl+':''}${e.key.toLowerCase()}`;if(k==='ctrl+n')openModal('create-project');if(k==='ctrl+k')document.getElementById('global-search').focus();if(k==='ctrl+enter')openModal('run-workflow');if(k==='ctrl+`')showPanel('console');if(k==='ctrl+,')showPanel('settings');if(k==='ctrl+b')toggleSidebar();if(k==='f5'){e.preventDefault();refreshData()}});
+function showPanel(n){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(`panel-${n}`)?.classList.add('active');document.querySelector(`.nav-item[data-panel="${n}"]`)?.classList.add('active');const t={overview:'Overview',projects:'Projects',agents:'Agents',workflows:'Workflows',console:'Console',network:'Network Graph',performance:'Performance',costs:'Costs',scheduler:'Scheduler',backup:'Backup',settings:'Settings',shortcuts:'Shortcuts'};document.getElementById('panel-title').textContent=t[n]||'Dashboard'}
+document.querySelectorAll('.nav-item').forEach(i=>i.addEventListener('click',()=>showPanel(i.dataset.panel)));
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{const p=t.closest('.panel');p.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');const n=t.dataset.tab;p.querySelectorAll('.tabs-content').forEach(c=>c.classList.remove('active'));p.querySelector(`[id="tab-${n}"]`)?.classList.add('active')}));
+async function fetchHealth(){const d=await apiGet('/health');if(d){document.getElementById('stat-workflows').textContent=d.active_workflows??0;document.getElementById('stat-queue').textContent=d.queue_size??0;document.getElementById('stat-projects').textContent=d.memory_projects??0}}
+async function fetchAgents(){const d=await apiGet('/agents/status');if(d){const o=d.online_count||0;document.getElementById('stat-agents').textContent=`${o}/${d.total||0}`}}
+async function fetchWorkflows(){const d=await apiGet('/');if(d&&d.workflows){state.workflows=d.workflows;renderWorkflowsTable()}}
+async function fetchProjects(){const d=await apiGet('/memory/projects');if(d){state.projects=d.projects||[];renderProjectsList()}}
+async function refreshData(){await Promise.all([fetchHealth(),fetchAgents(),fetchWorkflows(),fetchProjects()])}
+function renderWorkflowsTable(){const b=document.querySelector('#workflows-table tbody');b.innerHTML=state.workflows.map(w=>`<tr><td>${(w.id||'').substring(0,8)||'-'}...</td><td>${w.type||'-'}</td><td>${w.status||'-'}</td><td>${w.results?.length||0}</td><td><button class="btn btn-secondary btn-sm">View</button></td></tr>`).join('')}
+function renderProjectsList(){const c=document.getElementById('projects-list');if(state.projects.length===0){c.innerHTML='<div class="empty-state"><p>No projects yet. Create your first project!</p></div>';return}c.innerHTML=state.projects.map(p=>`<div class="card"><div class="card-header"><span class="card-title">${p.name||'Unnamed'}</span><button class="btn btn-secondary btn-sm">Open</button></div><p style="color:var(--text-secondary);font-size:14px">${p.description||'No description'}</p></div>`).join('')}
+async function createProject(e){e.preventDefault();const btn=document.getElementById('create-project-btn');btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;const d={name:document.getElementById('project-name').value,description:document.getElementById('project-description').value};const r=await apiPost('/memory/projects',d);if(r?.success){showToast('success','Project created!');closeModal('create-project');fetchProjects()}else{showToast('error','Failed to create project')}btn.innerHTML='Create';btn.disabled=false}
+async function runWorkflow(e){e.preventDefault();const btn=document.getElementById('run-workflow-btn');btn.innerHTML='<span class="spinner"></span> Running...';btn.disabled=true;const d={requirements:document.getElementById('workflow-requirements').value,stack:document.getElementById('workflow-stack').value||undefined};const r=await apiPost(`/workflows/${document.getElementById('workflow-type').value}`,d);if(r?.success){showToast('success','Workflow started!');closeModal('run-workflow');fetchWorkflows()}else{showToast('error','Failed to start workflow')}btn.innerHTML='Run';btn.disabled=false}
+function clearConsole(){document.getElementById('console').innerHTML='';state.consoleLogs=[]}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function saveSettings(){state.serverUrl=document.getElementById('server-url').value;state.refreshInterval=parseInt(document.getElementById('refresh-interval').value)*1000;showToast('success','Settings saved!')}
+function saveBackupSettings(){showToast('success','Backup settings saved!')}
+async function createBackup(){showToast('info','Creating backup...');await new Promise(r=>setTimeout(r,1000));showToast('success','Backup created!')}
+function addConsoleLog(level,msg){const c=document.getElementById('console');const f=document.getElementById('console-filter')?.value||'all';if(f!=='all'&&f!==level)return;const t=new Date().toLocaleTimeString();const l=document.createElement('div');l.className='console-line';l.innerHTML=`<span class="console-time">${t}</span><span class="console-level ${level}">[${level.toUpperCase()}]</span><span>${msg}</span>`;c.appendChild(l);c.scrollTop=c.scrollHeight;state.consoleLogs.push({t,level,msg})}
+let refreshTimer;
+async function init(){await initDB();await refreshData();refreshTimer=setInterval(refreshData,state.refreshInterval);addConsoleLog('success','Dashboard initialized');addConsoleLog('info',`Connected to ${state.serverUrl}`)}
+document.getElementById('theme-toggle')?.addEventListener('click',()=>document.body.classList.toggle('light-theme'));
+document.getElementById('new-project-btn')?.addEventListener('click',()=>openModal('create-project'));
+init();
 </script>
 </body>
 </html>

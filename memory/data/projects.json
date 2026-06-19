@@ -1,0 +1,16 @@
+{
+  "2bd884de-5c0a-4e23-adbb-f0091d730f49": {
+    "id": "2bd884de-5c0a-4e23-adbb-f0091d730f49",
+    "name": "Persistence Test",
+    "description": "Testing memory persistence",
+    "architecture": "",
+    "decisions": [],
+    "files": {},
+    "patterns": [],
+    "stack": [],
+    "workflow_id": "",
+    "complexity": "medium",
+    "created_at": 1781875997.6249948,
+    "updated_at": 1781875997.6249952
+  }
+}

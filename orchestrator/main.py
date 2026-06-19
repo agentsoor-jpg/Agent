@@ -32,7 +32,7 @@ try:
 except ImportError:
     pass
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
+from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from pydantic import BaseModel
@@ -588,6 +588,196 @@ async def get_locks():
     return {"locks": dispatcher.get_file_locks()}
 
 
+# ── v7.0 API Endpoints ─────────────────────────────────────────
+
+# Import new v7.0 modules (optional - graceful degradation)
+try:
+    from core.security import (
+        SecurityHeaders, RateLimiter, APIKeyManager,
+        general_rate_limiter, api_key_manager, input_sanitizer,
+    )
+    from core.reliability import (
+        health_check_manager, graceful_shutdown, CircuitBreaker,
+    )
+    from core.monitoring import (
+        metrics_collector, prometheus_exporter, health_dashboard,
+        alert_manager, performance_monitor, uptime_tracker,
+    )
+    from integrations.webhook_manager import webhook_manager
+    from integrations.api_gateway import APIGateway, api_gateway
+    from coordination.task_orchestrator import task_orchestrator
+    from coordination.quality_controller import quality_controller
+    from coordination.conflict_resolver import conflict_resolver
+    from memory.context_window_manager import context_manager
+    from memory.forgetting_curve import forgetting_curve
+    
+    V70_MODULES_LOADED = True
+except ImportError as e:
+    print(f"v7.0 modules not fully available: {e}")
+    V70_MODULES_LOADED = False
+
+
+# ── v7.0 Endpoints ───────────────────────────────────────────
+
+@app.get("/api/v1/health")
+async def api_health():
+    """v7 API health check."""
+    return {
+        "status": "healthy",
+        "version": "7.0.0",
+        "uptime": uptime_tracker.get_uptime_stats() if V70_MODULES_LOADED else {},
+    }
+
+
+@app.get("/api/v1/metrics")
+async def api_metrics():
+    """Prometheus metrics endpoint."""
+    if not V70_MODULES_LOADED:
+        raise HTTPException(status_code=503, detail="Metrics not available")
+    return await prometheus_exporter.get_json()
+
+
+@app.get("/api/v1/dashboard")
+async def api_dashboard():
+    """Health dashboard endpoint."""
+    if not V70_MODULES_LOADED:
+        raise HTTPException(status_code=503, detail="Dashboard not available")
+    return await health_dashboard.get_dashboard()
+
+
+@app.get("/api/v1/quality/agents")
+async def api_quality_agents():
+    """Get agent quality statistics."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Quality controller not available"}
+    
+    results = {}
+    for agent_id in dispatcher.agents.keys():
+        results[agent_id] = await quality_controller.get_agent_performance(agent_id)
+    return results
+
+
+@app.post("/api/v1/quality/evaluate")
+async def api_quality_evaluate(request: TaskRequest):
+    """Evaluate agent output quality."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Quality controller not available"}
+    
+    result = await quality_controller.evaluate(
+        agent_id=request.type,
+        code=request.payload.get("code", ""),
+        requirements=request.payload.get("requirements", ""),
+    )
+    return result
+
+
+@app.get("/api/v1/memory/forgetting")
+async def api_memory_forgetting():
+    """Get forgetting curve statistics."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Forgetting curve not available"}
+    
+    return forgetting_curve.get_stats()
+
+
+@app.post("/api/v1/memory/forgetting/review/{memory_id}")
+async def api_memory_review(memory_id: str, quality: int = 3):
+    """Review a memory item (spaced repetition)."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Forgetting curve not available"}
+    
+    result = forgetting_curve.review_memory(memory_id, quality)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Memory not found")
+    return result
+
+
+@app.get("/api/v1/context/stats")
+async def api_context_stats():
+    """Get context window statistics."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Context manager not available"}
+    
+    return context_manager.get_stats()
+
+
+@app.post("/api/v1/webhooks")
+async def api_create_webhook(name: str, url: str, secret: Optional[str] = None):
+    """Create a webhook."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Webhook manager not available"}
+    
+    webhook_id = webhook_manager.register_webhook(name, url, secret)
+    return {"success": True, "webhook_id": webhook_id}
+
+
+@app.get("/api/v1/webhooks")
+async def api_list_webhooks():
+    """List all webhooks."""
+    if not V70_MODULES_LOADED:
+        return {"error": "Webhook manager not available"}
+    
+    return {"webhooks": webhook_manager.list_webhooks()}
+
+
+@app.post("/webhooks/github")
+async def webhook_github(request: Request):
+    """GitHub webhook endpoint."""
+    if not V70_MODULES_LOADED:
+        raise HTTPException(status_code=503, detail="Webhook manager not available")
+    
+    payload = await request.json()
+    event = request.headers.get("X-GitHub-Event", "push")
+    
+    await webhook_manager.handle_event(f"github.{event}", payload)
+    return {"success": True}
+
+
+@app.post("/webhooks/slack")
+async def webhook_slack(request: Request):
+    """Slack webhook endpoint."""
+    if not V70_MODULES_LOADED:
+        raise HTTPException(status_code=503, detail="Webhook manager not available")
+    
+    payload = await request.body()
+    await webhook_manager.handle_event("slack.interaction", {"raw": payload.decode()})
+    return {"success": True}
+
+
+@app.post("/api/v1/api-keys")
+async def api_create_key(name: str, tier: str = "free"):
+    """Create an API key."""
+    if not V70_MODULES_LOADED:
+        return {"error": "API gateway not available"}
+    
+    key, metadata = api_gateway.generate_key(name, tier)
+    return {"key": key, "metadata": metadata}
+
+
+@app.get("/api/v1/api-keys")
+async def api_list_keys():
+    """List API keys."""
+    if not V70_MODULES_LOADED:
+        return {"error": "API gateway not available"}
+    
+    return {"keys": api_gateway.list_keys()}
+
+
+# ── v7.0 Middleware ──────────────────────────────────────────
+
+@app.middleware("http")
+async def v7_security_headers(request, call_next):
+    """Add security headers to all responses."""
+    response = await call_next(request)
+    
+    if V70_MODULES_LOADED:
+        for key, value in SecurityHeaders.get_headers().items():
+            response.headers[key] = value
+    
+    response.headers["X-AIOS-Version"] = "7.0.0"
+    return response
+
+
 # ── Entry point ───────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -603,25 +793,30 @@ if __name__ == "__main__":
     }.items() if v]
 
     print(f"""
-    ██████╗ AI Engineering OS v3.0
-    ├── Environment:  {APP_ENV}
-    ├── Orchestrator: FastAPI on 0.0.0.0:{port}
-    ├── Dispatcher:   Async with file locking + SSE
-    ├── Memory:       Permanent JSON vector store
-    ├── Planning:     Pre-execution plan generator
-    ├── Verification: Post-build checker
-    ├── Agents:       OpenHands·Aider·Bolt·Replit
-    ├── API keys:     {', '.join(configured_keys) if configured_keys else 'none configured (agents run in offline mode)'}
-    ├── Database:     {DATABASE_URL}
-    ├── Dashboard:    http://0.0.0.0:{port}/dashboard
-    └── Docs:         http://0.0.0.0:{port}/docs
+    ██████╗ AI Engineering OS v7.0
+    ├── Version:        7.0.0
+    ├── Environment:     {APP_ENV}
+    ├── Orchestrator:   FastAPI on 0.0.0.0:{port}
+    ├── Dispatcher:     Async with file locking + SSE
+    ├── Memory:         Permanent JSON + Vector + Forgetting Curve
+    ├── Planning:       Pre-execution plan generator
+    ├── Verification:   Post-build checker
+    ├── Agents:         OpenHands·Aider·Bolt·Replit
+    ├── API keys:       {', '.join(configured_keys) if configured_keys else 'none configured (agents run in offline mode)'}
+    ├── Database:       {DATABASE_URL}
+    ├── Dashboard:      http://0.0.0.0:{port}/dashboard
+    ├── Docs:           http://0.0.0.0:{port}/docs
+    ├── Metrics:        http://0.0.0.0:{port}/api/v1/metrics
+    └── v7.0 Modules:   {'Loaded' if V70_MODULES_LOADED else 'Partially loaded (graceful degradation)'}
     """)
 
+    # Start v7.0 components - will be started by uvicorn's lifespan
+    # asyncio tasks are started when the app begins
+    
     uvicorn.run(
         "orchestrator.main:app",
         host="0.0.0.0",
         port=port,
         log_level=log_level,
-        # Reload only in dev so Render prod stays stable
         reload=(APP_ENV == "development"),
     )

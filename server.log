@@ -1,0 +1,115 @@
+INFO:     Will watch for changes in these directories: ['/workspace/project/Agent']
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:     Started reloader process [1531] using StatReload
+
+    ██████╗ AI Engineering OS v7.0
+    ├── Version:        7.0.0
+    ├── Environment:     development
+    ├── Orchestrator:   FastAPI on 0.0.0.0:8080
+    ├── Dispatcher:     Async with file locking + SSE
+    ├── Memory:         Permanent JSON + Vector + Forgetting Curve
+    ├── Planning:       Pre-execution plan generator
+    ├── Verification:   Post-build checker
+    ├── Agents:         OpenHands·Aider·Bolt·Replit
+    ├── API keys:       none configured (agents run in offline mode)
+    ├── Database:       sqlite:///aios.db
+    ├── Dashboard:      http://0.0.0.0:8080/dashboard
+    ├── Docs:           http://0.0.0.0:8080/docs
+    ├── Metrics:        http://0.0.0.0:8080/api/v1/metrics
+    └── v7.0 Modules:   Loaded
+    
+INFO:     Started server process [1534]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:39914 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39922 - "GET /api/v1/health HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/encoders.py", line 345, in jsonable_encoder
+    data = dict(obj)
+TypeError: 'coroutine' object is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/encoders.py", line 350, in jsonable_encoder
+    data = vars(obj)
+TypeError: vars() argument must have __dict__ attribute
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/openhands/.local/lib/python3.13/site-packages/uvicorn/protocols/http/h11_impl.py", line 415, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/openhands/.local/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 62, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/applications.py", line 1162, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/project/Agent/orchestrator/main.py", line 771, in v7_security_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/routing.py", line 1220, in handle
+    await super().handle(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/routing.py", line 143, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/openhands/.local/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/routing.py", line 129, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/routing.py", line 704, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<11 lines>...
+    )
+    ^
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/routing.py", line 326, in serialize_response
+    return jsonable_encoder(response_content)
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/encoders.py", line 306, in jsonable_encoder
+    encoded_value = jsonable_encoder(
+        value,
+    ...<4 lines>...
+        sqlalchemy_safe=sqlalchemy_safe,
+    )
+  File "/home/openhands/.local/lib/python3.13/site-packages/fastapi/encoders.py", line 353, in jsonable_encoder
+    raise ValueError(errors) from e
+ValueError: [TypeError("'coroutine' object is not iterable"), TypeError('vars() argument must have __dict__ attribute')]
+INFO:     127.0.0.1:39934 - "GET /api/v1/metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39948 - "GET /api/v1/quality/agents HTTP/1.1" 200 OK
