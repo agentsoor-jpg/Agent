@@ -1,0 +1,121 @@
+{
+  "4a0a2a78-c5cc-472d-872d-5fb71f94abf8": {
+    "id": "4a0a2a78-c5cc-472d-872d-5fb71f94abf8",
+    "type": "full-app-generation",
+    "status": "completed",
+    "payload": {
+      "requirements": "Build a REST API with FastAPI and PostgreSQL for a task management system with user authentication",
+      "stack": "FastAPI, PostgreSQL, JWT",
+      "features": [
+        "auth",
+        "tasks",
+        "users"
+      ]
+    },
+    "steps": [
+      {
+        "agent": "bolt",
+        "action": "scaffold",
+        "timeout": 300,
+        "fallback": "openhands",
+        "max_retries": 2,
+        "validation": "files_created"
+      },
+      {
+        "agent": "aider",
+        "action": "edit",
+        "timeout": 300,
+        "fallback": "openhands",
+        "max_retries": 2,
+        "validation": "files_modified"
+      },
+      {
+        "agent": "replit",
+        "action": "test",
+        "timeout": 300,
+        "fallback": null,
+        "max_retries": 1,
+        "validation": "tests_pass"
+      },
+      {
+        "agent": "openhands",
+        "action": "review",
+        "timeout": 300,
+        "fallback": null,
+        "max_retries": 1,
+        "validation": "review_complete"
+      }
+    ],
+    "results": [
+      {
+        "task_id": "c8411a0d-b5fa-47e7-9b00-f74a22472ecb",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'scaffold' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "_fell_back_from": "bolt",
+        "action": "scaffold",
+        "step_agent": "bolt"
+      },
+      {
+        "task_id": "fcf3d5eb-c571-4384-b40a-1a9eb6f13518",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'edit' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "_fell_back_from": "aider",
+        "action": "edit",
+        "step_agent": "aider"
+      },
+      {
+        "task_id": "015189ce-a499-4e34-87c2-b3658e2d7111",
+        "agent_id": "replit",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "Replit offline \u2014 Agent not reachable at port 3004. Action 'test' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3004",
+        "artifacts": [],
+        "stdout": "",
+        "stderr": "Agent not reachable at port 3004",
+        "exit_code": -1,
+        "tests_passed": null,
+        "action": "test",
+        "step_agent": "replit"
+      },
+      {
+        "task_id": "c9c46b7d-a67f-425d-a3fb-87eeb1bf5972",
+        "agent_id": "openhands",
+        "status": "offline",
+        "duration_s": 0.01,
+        "modified_files": [],
+        "summary": "OpenHands offline \u2014 Agent not reachable at port 3001. Action 'review' queued for retry.",
+        "next_actions": [
+          "retry_when_available"
+        ],
+        "error": "Agent not reachable at port 3001",
+        "artifacts": [],
+        "action": "review",
+        "step_agent": "openhands"
+      }
+    ],
+    "created_at": 1781863397.6588829,
+    "updated_at": 1781863402.7612047,
+    "complexity": "medium"
+  }
+}

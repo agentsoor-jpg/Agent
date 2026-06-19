@@ -1,16 +1,45 @@
 {
   "task_routing": {
     "app_scaffolding": "bolt",
+    "ui_generation": "bolt",
+    "prototyping": "bolt",
     "file_editing": "aider",
+    "refactoring": "aider",
+    "bug_fixing": "aider",
     "code_execution": "replit",
+    "testing": "replit",
+    "verification": "replit",
     "autonomous_execution": "openhands",
     "debugging": "openhands",
-    "code_review": "openhands"
+    "code_review": "openhands",
+    "analysis": "openhands"
   },
   "fallback_chain": {
-    "bolt": ["aider", "openhands"],
-    "aider": ["openhands"],
-    "replit": ["openhands"],
-    "openhands": []
+    "bolt": "aider",
+    "aider": "openhands",
+    "replit": "openhands",
+    "openhands": null
+  },
+  "agent_boundaries": {
+    "bolt": {
+      "can_create_files": true,
+      "can_edit_existing": false,
+      "max_concurrent_tasks": 1
+    },
+    "aider": {
+      "can_create_files": false,
+      "can_edit_existing": true,
+      "max_concurrent_tasks": 2
+    },
+    "openhands": {
+      "can_create_files": true,
+      "can_edit_existing": true,
+      "max_concurrent_tasks": 1
+    },
+    "replit": {
+      "can_create_files": false,
+      "can_edit_existing": false,
+      "max_concurrent_tasks": 2
+    }
   }
 }

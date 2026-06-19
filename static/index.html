@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Engineering OS</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1f2937;
+    --border: #30363d; --text: #e6edf3; --text2: #8b949e;
+    --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+    --yellow: #d29922; --purple: #a371f7; --orange: #f0883e;
+  }
+  .light {
+    --bg: #f6f8fa; --surface: #ffffff; --surface2: #f3f4f6;
+    --border: #d0d7de; --text: #1f2328; --text2: #57606a;
+    --accent: #0969da; --green: #1a7f37; --red: #cf222e;
+    --yellow: #9a6700; --purple: #8250df; --orange: #bc4c00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 220px 1fr; grid-template-rows: 52px 1fr; height: 100vh; }
+  .topbar { grid-column: 1 / -1; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 8px 0; }
+  .main { overflow-y: auto; padding: 20px; }
+
+  /* Topbar */
+  .logo { font-weight: 700; font-size: 15px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent), var(--purple)); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .system-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .dot.offline { background: var(--red); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .btn-icon { background: none; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all .15s; }
+  .btn-icon:hover { background: var(--surface2); }
+
+  /* Sidebar nav */
+  .nav-section { padding: 4px 8px; margin-top: 4px; }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; padding: 8px 8px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all .15s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(88,166,255,.12); color: var(--accent); }
+  .nav-item .icon { width: 16px; text-align: center; }
+  .badge { margin-left: auto; background: var(--accent); color: white; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .card-title { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+  .card-value { font-size: 28px; font-weight: 700; color: var(--text); }
+  .card-value.green { color: var(--green); }
+  .card-value.red { color: var(--red); }
+  .card-value.yellow { color: var(--yellow); }
+  .card-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+  /* Agent cards */
+  .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .agent-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .agent-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .agent-avatar { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .agent-name { font-weight: 600; font-size: 14px; }
+  .agent-role { font-size: 11px; color: var(--text2); }
+  .status-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .status-pill.online { background: rgba(63,185,80,.15); color: var(--green); }
+  .status-pill.offline { background: rgba(248,81,73,.15); color: var(--red); }
+  .status-pill.busy { background: rgba(210,153,34,.15); color: var(--yellow); }
+  .agent-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 11px; }
+  .agent-stat { background: var(--surface2); border-radius: 6px; padding: 6px 8px; }
+  .agent-stat-label { color: var(--text2); margin-bottom: 2px; }
+  .agent-stat-value { font-weight: 600; }
+
+  /* Forms & inputs */
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+  .form-input, .form-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; transition: border .15s; font-family: inherit; }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  textarea.form-input { resize: vertical; min-height: 100px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+  textarea.large { min-height: 300px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-success { background: var(--green); color: white; }
+  .btn-success:hover { filter: brightness(1.1); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { filter: brightness(1.1); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* Terminal */
+  .terminal { background: #0a0e13; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; height: 320px; overflow-y: auto; }
+  .terminal-line { margin: 2px 0; line-height: 1.5; }
+  .terminal-line.cmd { color: var(--accent); }
+  .terminal-line.out { color: #c9d1d9; }
+  .terminal-line.err { color: var(--red); }
+  .terminal-line.info { color: var(--green); }
+  .terminal-line.warn { color: var(--yellow); }
+  .terminal-input-row { display: flex; gap: 8px; margin-top: 8px; }
+  .terminal-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: 'SF Mono','Fira Code',monospace; outline: none; }
+  .terminal-input:focus { border-color: var(--accent); }
+
+  /* File tree */
+  .file-tree { background: var(--surface2); border-radius: 8px; padding: 10px; font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
+  .file-item { padding: 3px 4px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text); }
+  .file-item:hover { background: var(--border); }
+  .file-item.dir { color: var(--accent); }
+  .file-item .size { margin-left: auto; color: var(--text2); font-size: 10px; }
+
+  /* Workflows table */
+  .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table th { text-align: left; padding: 8px 12px; background: var(--surface2); border-bottom: 1px solid var(--border); color: var(--text2); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  .table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: var(--surface2); }
+
+  /* Workflow steps */
+  .steps-list { display: flex; flex-direction: column; gap: 6px; }
+  .step-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface2); border-radius: 6px; font-size: 12px; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .step-agent { font-weight: 600; min-width: 80px; }
+  .step-action { color: var(--text2); }
+  .step-status { margin-left: auto; }
+
+  /* Policy editor */
+  .policy-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .policy-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--text2); transition: all .15s; }
+  .policy-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Env editor */
+  .env-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 6px; align-items: center; }
+  .env-key { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; font-family: monospace; outline: none; }
+  .env-val { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; font-family: monospace; outline: none; }
+  .env-key:focus, .env-val:focus { border-color: var(--accent); }
+
+  /* Response panel */
+  .response-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 14px; font-size: 12px; font-family: 'SF Mono','Fira Code',monospace; white-space: pre-wrap; word-break: break-word; max-height: 400px; overflow-y: auto; display: none; }
+  .response-box.show { display: block; }
+
+  /* Section headers */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 600; }
+  .section-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* Toast */
+  #toast-container { position: fixed; top: 60px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 13px; animation: slide-in .2s ease; display: flex; align-items: center; gap: 8px; min-width: 240px; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+  .toast.success { border-color: var(--green); }
+  .toast.error { border-color: var(--red); }
+  .toast.info { border-color: var(--accent); }
+  @keyframes slide-in { from{transform:translateX(20px);opacity:0} to{transform:none;opacity:1} }
+
+  /* Loading spinner */
+  .spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Workflow result detail */
+  .result-step { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  .result-step-header { padding: 10px 14px; background: var(--surface2); display: flex; align-items: center; justify-content: space-between; font-size: 12px; cursor: pointer; }
+  .result-step-body { padding: 12px 14px; font-size: 11px; font-family: monospace; white-space: pre-wrap; display: none; }
+  .result-step-body.open { display: block; }
+
+  /* Upload area */
+  .upload-area { border: 2px dashed var(--border); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: border .15s; }
+  .upload-area:hover { border-color: var(--accent); }
+  .upload-area input { display: none; }
+
+  /* Event log */
+  .event-log { background: var(--surface2); border-radius: 8px; overflow: hidden; }
+  .event-row { display: flex; align-items: flex-start; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .event-row:last-child { border-bottom: none; }
+  .event-time { color: var(--text2); min-width: 70px; font-family: monospace; font-size: 11px; }
+  .event-type { min-width: 80px; }
+  .event-msg { color: var(--text); flex: 1; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; grid-template-rows: 52px auto 1fr; }
+    .sidebar { grid-row: 2; display: flex; overflow-x: auto; padding: 4px 8px; border-right: none; border-bottom: 1px solid var(--border); }
+    .nav-label { display: none; }
+    .main { grid-row: 3; padding: 12px; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .agent-grid { grid-template-columns: 1fr; }
+    .env-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🧠</div>
+    AI Engineering OS
+  </div>
+  <div class="topbar-right">
+    <div class="system-status">
+      <div class="dot" id="system-dot"></div>
+      <span id="system-status-text">Connecting…</span>
+    </div>
+    <button class="btn-icon" onclick="toggleTheme()" title="Toggle theme">🌓</button>
+    <button class="btn-icon" onclick="refreshAll()" title="Refresh">⟳ Refresh</button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="nav-label">Overview</div>
+  <button class="nav-item active" onclick="showPanel('dashboard')"><span class="icon">🏠</span> Dashboard</button>
+  <button class="nav-item" onclick="showPanel('workflows')"><span class="icon">⚡</span> Workflows <span class="badge" id="wf-badge">0</span></button>
+  <button class="nav-item" onclick="showPanel('agents')"><span class="icon">🤖</span> Agents</button>
+  <div class="nav-label">Tools</div>
+  <button class="nav-item" onclick="showPanel('terminal')"><span class="icon">⌨️</span> Terminal</button>
+  <button class="nav-item" onclick="showPanel('files')"><span class="icon">📁</span> Files</button>
+  <button class="nav-item" onclick="showPanel('upload')"><span class="icon">⬆️</span> Upload</button>
+  <div class="nav-label">Config</div>
+  <button class="nav-item" onclick="showPanel('policies')"><span class="icon">📋</span> Policies</button>
+  <button class="nav-item" onclick="showPanel('env')"><span class="icon">🔑</span> Env Vars</button>
+  <div class="nav-label">Monitoring</div>
+  <button class="nav-item" onclick="showPanel('events')"><span class="icon">📡</span> Event Log</button>
+</div>
+
+<!-- Main content -->
+<div class="main">
+
+  <!-- DASHBOARD PANEL -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="section-header">
+      <div>
+        <div class="section-title">System Overview</div>
+        <div class="section-sub">AI Engineering OS — Live Status</div>
+      </div>
+      <button class="btn btn-primary" onclick="showPanel('workflows')">⚡ New Workflow</button>
+    </div>
+
+    <div class="cards" id="overview-cards">
+      <div class="card"><div class="card-title">Status</div><div class="card-value green" id="ov-status">–</div><div class="card-sub">System health</div></div>
+      <div class="card"><div class="card-title">Active Workflows</div><div class="card-value" id="ov-active">–</div><div class="card-sub">Running now</div></div>
+      <div class="card"><div class="card-title">Completed</div><div class="card-value green" id="ov-completed">–</div><div class="card-sub">All time</div></div>
+      <div class="card"><div class="card-title">Agents Online</div><div class="card-value" id="ov-agents">–</div><div class="card-sub">of 4 total</div></div>
+      <div class="card"><div class="card-title">Queue</div><div class="card-value" id="ov-queue">–</div><div class="card-sub">Pending tasks</div></div>
+      <div class="card"><div class="card-title">File Locks</div><div class="card-value" id="ov-locks">–</div><div class="card-sub">Active locks</div></div>
+    </div>
+
+    <div class="section-header" style="margin-top:8px">
+      <div class="section-title" style="font-size:14px">Recent Workflows</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <table class="table">
+        <thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Complexity</th><th>Steps</th><th>Started</th></tr></thead>
+        <tbody id="recent-workflows-table"><tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">No workflows yet</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WORKFLOWS PANEL -->
+  <div class="panel" id="panel-workflows">
+    <div class="section-header">
+      <div><div class="section-title">Workflow Runner</div><div class="section-sub">Trigger multi-agent workflows</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px">
+        <div style="font-weight:600;margin-bottom:14px;font-size:14px">⚡ New Workflow</div>
+        <div class="form-group">
+          <label class="form-label">Workflow Type</label>
+          <select class="form-select" id="wf-type">
+            <option value="full-app-generation">Full App Generation</option>
+            <option value="refactoring">Refactoring</option>
+            <option value="bug-fixing">Bug Fixing</option>
+            <option value="prototyping">Prototyping</option>
+            <option value="code-review">Code Review</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Requirements (supports thousands of lines)</label>
+          <textarea class="form-input large" id="wf-requirements" placeholder="Describe what to build in as much detail as you need. This field handles very large inputs — paste full specs, PRDs, or code snippets."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tech Stack (optional)</label>
+          <input class="form-input" id="wf-stack" placeholder="e.g. FastAPI, PostgreSQL, React">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Features (comma-separated, optional)</label>
+          <input class="form-input" id="wf-features" placeholder="e.g. auth, file-upload, websockets">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="wf-run-btn" onclick="runWorkflow()">⚡ Run Workflow</button>
+          <button class="btn btn-secondary" onclick="clearWfForm()">Clear</button>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px">
+        <div style="font-weight:600;margin-bottom:14px;font-size:14px">🎯 Workflow Steps</div>
+        <div id="wf-steps-preview" class="steps-list">
+          <div style="color:var(--text2);font-size:12px;text-align:center;padding:30px">Select a workflow type to see steps</div>
+        </div>
+        <div id="wf-result" class="response-box"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-weight:600;font-size:14px">All Workflows</span>
+        <button class="btn btn-secondary" onclick="loadWorkflows()">⟳ Refresh</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="table">
+          <thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Steps Done</th><th>Complexity</th><th>Actions</th></tr></thead>
+          <tbody id="workflows-table"><tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTS PANEL -->
+  <div class="panel" id="panel-agents">
+    <div class="section-header">
+      <div><div class="section-title">Agent Status</div><div class="section-sub">Live health check on ports 3001–3004</div></div>
+      <button class="btn btn-primary" onclick="checkAgents()">⟳ Check All</button>
+    </div>
+    <div class="agent-grid" id="agent-grid">
+      <!-- Populated by JS -->
+    </div>
+    <div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px">
+      <div style="font-weight:600;margin-bottom:12px;font-size:14px">🗺 Task Routing</div>
+      <div class="form-group">
+        <label class="form-label">Task Type</label>
+        <select class="form-select" id="route-type">
+          <option value="app_scaffolding">App Scaffolding → Bolt</option>
+          <option value="file_editing">File Editing → Aider</option>
+          <option value="refactoring">Refactoring → Aider</option>
+          <option value="debugging">Debugging → OpenHands</option>
+          <option value="code_review">Code Review → OpenHands</option>
+          <option value="code_execution">Code Execution → Replit</option>
+          <option value="testing">Testing → Replit</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description (affects complexity analysis)</label>
+        <input class="form-input" id="route-desc" placeholder="Describe the task to route…">
+      </div>
+      <button class="btn btn-primary" onclick="routeTask()">🎯 Route Task</button>
+      <div id="route-result" class="response-box"></div>
+    </div>
+  </div>
+
+  <!-- TERMINAL PANEL -->
+  <div class="panel" id="panel-terminal">
+    <div class="section-header">
+      <div><div class="section-title">Live Terminal</div><div class="section-sub">Run commands on the orchestrator server (30s timeout)</div></div>
+      <button class="btn btn-danger" onclick="clearTerminal()">✕ Clear</button>
+    </div>
+    <div class="terminal" id="terminal-output">
+      <div class="terminal-line info">AI Engineering OS Terminal — type commands below</div>
+      <div class="terminal-line info">Working directory: /home/runner/workspace</div>
+    </div>
+    <div class="terminal-input-row">
+      <span style="color:var(--green);font-family:monospace;font-size:13px;padding:8px 4px">$</span>
+      <input class="terminal-input" id="terminal-input" placeholder="Enter command…" onkeydown="if(event.key==='Enter')runTerminalCmd()">
+      <button class="btn btn-primary" onclick="runTerminalCmd()">Run</button>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary" style="font-size:11px" onclick="quickCmd('python -c \"import sys; print(sys.version)\"')">Python version</button>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="quickCmd('curl -s localhost:8000/health')">Health check</button>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="quickCmd('ls -la workspaces/')">List workspaces</button>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="quickCmd('pip list | head -20')">pip list</button>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="quickCmd('ps aux | grep python')">Python procs</button>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="quickCmd('curl -s localhost:8000/agents/status')">Agent status</button>
+    </div>
+  </div>
+
+  <!-- FILES PANEL -->
+  <div class="panel" id="panel-files">
+    <div class="section-header">
+      <div><div class="section-title">File Tree</div><div class="section-sub">Browse workspace files</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="form-input" id="file-path-input" placeholder="Path (e.g. workspaces)" style="width:180px;margin:0">
+        <button class="btn btn-primary" onclick="loadFiles()">Browse</button>
+      </div>
+    </div>
+    <div id="file-tree-container" class="file-tree">
+      <div style="color:var(--text2);font-size:12px">Enter a path and click Browse</div>
+    </div>
+    <div id="file-count" style="margin-top:8px;font-size:11px;color:var(--text2)"></div>
+  </div>
+
+  <!-- UPLOAD PANEL -->
+  <div class="panel" id="panel-upload">
+    <div class="section-header">
+      <div><div class="section-title">File Upload</div><div class="section-sub">Upload files to workspaces/</div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px">
+      <div class="upload-area" onclick="document.getElementById('file-upload').click()">
+        <input type="file" id="file-upload" multiple onchange="handleFileUpload(this)">
+        <div style="font-size:32px;margin-bottom:8px">📁</div>
+        <div style="font-weight:600;margin-bottom:4px">Drop files or click to upload</div>
+        <div style="font-size:12px;color:var(--text2)">Files will be saved to workspaces/</div>
+      </div>
+      <div id="upload-results" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- POLICIES PANEL -->
+  <div class="panel" id="panel-policies">
+    <div class="section-header">
+      <div><div class="section-title">Policy Editor</div><div class="section-sub">Edit routing, workflow, and healing policies</div></div>
+      <button class="btn btn-success" onclick="savePolicy()">💾 Save Policy</button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px">
+      <div class="policy-tabs" id="policy-tabs"></div>
+      <div class="form-group" style="margin-bottom:8px">
+        <label class="form-label">JSON Content</label>
+        <textarea class="form-input large" id="policy-editor" style="min-height:400px;font-family:monospace;font-size:12px"></textarea>
+      </div>
+      <div id="policy-status" style="font-size:12px;margin-top:6px;color:var(--text2)"></div>
+    </div>
+  </div>
+
+  <!-- ENV PANEL -->
+  <div class="panel" id="panel-env">
+    <div class="section-header">
+      <div><div class="section-title">Environment Variables</div><div class="section-sub">Manage .env file</div></div>
+      <div class="btn-row" style="margin:0">
+        <button class="btn btn-secondary" onclick="addEnvRow()">+ Add Variable</button>
+        <button class="btn btn-success" onclick="saveEnv()">💾 Save .env</button>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px">
+      <div id="env-rows"></div>
+      <div id="env-status" style="font-size:12px;margin-top:8px;color:var(--text2)"></div>
+    </div>
+  </div>
+
+  <!-- EVENTS PANEL -->
+  <div class="panel" id="panel-events">
+    <div class="section-header">
+      <div><div class="section-title">Event Log</div><div class="section-sub">Live workflow events — polls every 3s</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="poll-status" style="font-size:11px;color:var(--text2)">Polling active</span>
+        <button class="btn btn-secondary" onclick="clearEvents()">Clear</button>
+      </div>
+    </div>
+    <div class="event-log" id="event-log">
+      <div class="event-row"><span class="event-time">--:--:--</span><span class="event-type"><span class="status-pill online">SYSTEM</span></span><span class="event-msg">Event log started. Polling GET /workflows every 3s.</span></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<div id="toast-container"></div>
+
+<!-- Workflow detail modal -->
+<div id="wf-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:center;justify-content:center" onclick="closeModal(event)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;padding:24px" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-weight:600;font-size:16px" id="modal-title">Workflow Detail</span>
+      <button class="btn-icon" onclick="document.getElementById('wf-modal').style.display='none'">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const BASE = window.location.origin;
+let currentTheme = 'dark';
+let currentPolicy = 'workflow-policy';
+let policyData = {};
+let pollingInterval = null;
+let seenWorkflowIds = new Set();
+let cmdHistory = [];
+let historyIdx = -1;
+
+// ── Theme ────────────────────────────────────────────────────
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.body.classList.toggle('light', currentTheme === 'light');
+}
+
+// ── Navigation ───────────────────────────────────────────────
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  const items = document.querySelectorAll('.nav-item');
+  items.forEach(i => { if (i.textContent.toLowerCase().includes(name.replace('-',' '))) i.classList.add('active'); });
+  if (name === 'agents') checkAgents();
+  if (name === 'policies') loadPolicies();
+  if (name === 'env') loadEnv();
+  if (name === 'files') { document.getElementById('file-path-input').value = 'workspaces'; loadFiles(); }
+  if (name === 'workflows') { loadWorkflowStepsPreview(); loadWorkflows(); }
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = {success: '✓', error: '✗', info: 'ℹ'};
+  el.innerHTML = `<span>${icons[type] || '•'}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+// ── Health & Overview ────────────────────────────────────────
+async function fetchHealth() {
+  try {
+    const r = await fetch(`${BASE}/health`);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    document.getElementById('ov-status').textContent = d.status || '–';
+    document.getElementById('ov-status').className = 'card-value ' + (d.status === 'healthy' ? 'green' : 'red');
+    document.getElementById('ov-queue').textContent = d.queue_size ?? '–';
+    document.getElementById('ov-locks').textContent = d.file_locks ?? '–';
+    document.getElementById('system-dot').classList.remove('offline');
+    document.getElementById('system-status-text').textContent = 'System healthy';
+  } catch {
+    document.getElementById('ov-status').textContent = 'Offline';
+    document.getElementById('ov-status').className = 'card-value red';
+    document.getElementById('system-dot').classList.add('offline');
+    document.getElementById('system-status-text').textContent = 'Cannot reach server';
+  }
+}
+
+// ── Workflows ────────────────────────────────────────────────
+const WORKFLOW_STEPS = {
+  'full-app-generation': [
+    {agent:'bolt', action:'scaffold', desc:'Generate project structure and boilerplate', fallback:'openhands'},
+    {agent:'aider', action:'edit', desc:'Apply business logic and feature code', fallback:'openhands'},
+    {agent:'replit', action:'test', desc:'Run test suite and validate', fallback:null},
+    {agent:'openhands', action:'review', desc:'Code review and quality check', fallback:null},
+  ],
+  'refactoring': [
+    {agent:'openhands', action:'analyze', desc:'Analyze codebase and create refactoring plan', fallback:null},
+    {agent:'aider', action:'refactor', desc:'Apply targeted refactoring changes', fallback:'openhands'},
+    {agent:'replit', action:'test', desc:'Verify tests still pass', fallback:null},
+  ],
+  'bug-fixing': [
+    {agent:'openhands', action:'diagnose', desc:'Diagnose root cause of the bug', fallback:null},
+    {agent:'aider', action:'fix', desc:'Apply minimal targeted fix', fallback:'openhands'},
+    {agent:'replit', action:'verify', desc:'Run tests and confirm bug resolved', fallback:null},
+  ],
+  'prototyping': [
+    {agent:'bolt', action:'generate', desc:'Rapidly generate prototype', fallback:'aider'},
+    {agent:'replit', action:'preview', desc:'Launch preview server', fallback:null},
+  ],
+  'code-review': [
+    {agent:'openhands', action:'review', desc:'Full deep code review', fallback:null},
+  ],
+};
+
+const AGENT_COLORS = { bolt:'#f0883e', aider:'#58a6ff', openhands:'#a371f7', replit:'#3fb950' };
+const AGENT_EMOJIS = { bolt:'⚡', aider:'✏️', openhands:'🤖', replit:'🚀' };
+const AGENT_ROLES = { bolt:'App Generation & Scaffolding', aider:'Precision File Editing', openhands:'Autonomous Execution & Review', replit:'Runtime & Testing' };
+
+function loadWorkflowStepsPreview() {
+  const type = document.getElementById('wf-type').value;
+  const steps = WORKFLOW_STEPS[type] || [];
+  const container = document.getElementById('wf-steps-preview');
+  container.innerHTML = steps.map((s, i) => `
+    <div class="step-item">
+      <div class="step-num" style="background:${AGENT_COLORS[s.agent]}22;color:${AGENT_COLORS[s.agent]}">${i+1}</div>
+      <span>${AGENT_EMOJIS[s.agent]}</span>
+      <span class="step-agent" style="color:${AGENT_COLORS[s.agent]}">${s.agent}</span>
+      <span class="step-action">${s.action}</span>
+      <span style="color:var(--text2);font-size:11px;flex:1">${s.desc}</span>
+      ${s.fallback ? `<span style="font-size:10px;color:var(--text2)">↳${s.fallback}</span>` : ''}
+    </div>`).join('');
+}
+
+document.getElementById('wf-type')?.addEventListener('change', loadWorkflowStepsPreview);
+
+async function runWorkflow() {
+  const type = document.getElementById('wf-type').value;
+  const req = document.getElementById('wf-requirements').value.trim();
+  const stack = document.getElementById('wf-stack').value.trim();
+  const featStr = document.getElementById('wf-features').value.trim();
+  const features = featStr ? featStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  if (!req) { toast('Requirements are required', 'error'); return; }
+
+  const btn = document.getElementById('wf-run-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running…';
+
+  const result = document.getElementById('wf-result');
+  result.className = 'response-box show';
+  result.textContent = `Starting workflow: ${type}\nRequirements: ${req.slice(0,100)}${req.length>100?'...':''}\n\nSending to orchestrator…`;
+
+  try {
+    const r = await fetch(`${BASE}/workflows/${type}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ requirements: req, stack: stack || null, features: features.length ? features : null })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      result.textContent = `Error ${r.status}: ${JSON.stringify(d, null, 2)}`;
+      toast(`Workflow failed: ${d.detail || r.status}`, 'error');
+    } else {
+      result.textContent = JSON.stringify(d, null, 2);
+      toast(`Workflow ${type} completed — ${d.steps_completed} steps`, 'success');
+      addEvent('WORKFLOW', `Completed: ${type} (${d.steps_completed} steps)`, 'success');
+      loadWorkflows();
+    }
+  } catch(e) {
+    result.textContent = `Network error: ${e.message}`;
+    toast(`Cannot reach orchestrator: ${e.message}`, 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Run Workflow';
+}
+
+function clearWfForm() {
+  document.getElementById('wf-requirements').value = '';
+  document.getElementById('wf-stack').value = '';
+  document.getElementById('wf-features').value = '';
+  document.getElementById('wf-result').className = 'response-box';
+}
+
+async function loadWorkflows() {
+  try {
+    const r = await fetch(`${BASE}/workflows`);
+    const d = await r.json();
+    const workflows = d.active_workflows || [];
+    document.getElementById('wf-badge').textContent = workflows.filter(w => w.status === 'running').length || workflows.length;
+
+    // Overview counts
+    document.getElementById('ov-active').textContent = d.by_status?.running ?? workflows.filter(w => w.status === 'running').length;
+    document.getElementById('ov-completed').textContent = d.by_status?.completed ?? workflows.filter(w => w.status === 'completed').length;
+
+    // Recent table on dashboard
+    const recentBody = document.getElementById('recent-workflows-table');
+    if (workflows.length === 0) {
+      recentBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">No workflows yet</td></tr>';
+    } else {
+      recentBody.innerHTML = workflows.slice(-10).reverse().map(w => `
+        <tr onclick="showWorkflowDetail('${w.id}')" style="cursor:pointer">
+          <td style="font-family:monospace;font-size:11px">${w.id.slice(0,8)}…</td>
+          <td>${w.type}</td>
+          <td>${statusPill(w.status)}</td>
+          <td>${w.complexity || '–'}</td>
+          <td>${w.results?.length ?? 0}/${w.steps?.length ?? 0}</td>
+          <td style="font-size:11px;color:var(--text2)">${w.created_at ? new Date(w.created_at*1000).toLocaleTimeString() : '–'}</td>
+        </tr>`).join('');
+    }
+
+    // Workflows panel table
+    const tbody = document.getElementById('workflows-table');
+    if (tbody) {
+      if (workflows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">No workflows yet</td></tr>';
+      } else {
+        tbody.innerHTML = workflows.slice().reverse().map(w => `
+          <tr>
+            <td style="font-family:monospace;font-size:11px">${w.id.slice(0,8)}…</td>
+            <td>${w.type}</td>
+            <td>${statusPill(w.status)}</td>
+            <td>${w.results?.length ?? 0} / ${w.steps?.length ?? 0}</td>
+            <td>${w.complexity || '–'}</td>
+            <td><button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="showWorkflowDetail('${w.id}')">Detail</button></td>
+          </tr>`).join('');
+      }
+    }
+
+    // Event log — new workflows
+    workflows.forEach(w => {
+      if (!seenWorkflowIds.has(w.id)) {
+        seenWorkflowIds.add(w.id);
+        addEvent('WORKFLOW', `New: ${w.type} [${w.id.slice(0,8)}] — ${w.status}`);
+      }
+    });
+  } catch(e) {}
+}
+
+function statusPill(status) {
+  const map = { running:'busy', completed:'online', failed:'offline', interrupted:'offline' };
+  return `<span class="status-pill ${map[status]||'offline'}">${status}</span>`;
+}
+
+async function showWorkflowDetail(id) {
+  const r = await fetch(`${BASE}/workflows/${id}/status`);
+  const d = await r.json();
+  document.getElementById('modal-title').textContent = `Workflow: ${d.type} [${id.slice(0,8)}]`;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;font-size:12px">
+      <div><span style="color:var(--text2)">Status:</span> ${statusPill(d.status)}</div>
+      <div><span style="color:var(--text2)">Complexity:</span> ${d.complexity||'–'}</div>
+      <div><span style="color:var(--text2)">Steps:</span> ${d.results?.length||0} / ${d.steps?.length||0}</div>
+      <div><span style="color:var(--text2)">Started:</span> ${d.created_at ? new Date(d.created_at*1000).toLocaleString() : '–'}</div>
+    </div>
+    <div style="font-weight:600;margin-bottom:8px;font-size:13px">Results per step:</div>
+    ${(d.results||[]).map((r,i) => `
+      <div class="result-step">
+        <div class="result-step-header" onclick="this.nextSibling.classList.toggle('open')">
+          <span>${AGENT_EMOJIS[r.step_agent]||'•'} Step ${i+1}: <b>${r.step_agent}</b> → ${r.action}</span>
+          <span>${statusPill(r.status)} ${r.duration_s ? r.duration_s+'s' : ''}</span>
+        </div>
+        <div class="result-step-body">${JSON.stringify(r, null, 2)}</div>
+      </div>`).join('')}
+  `;
+  const modal = document.getElementById('wf-modal');
+  modal.style.display = 'flex';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('wf-modal')) document.getElementById('wf-modal').style.display = 'none';
+}
+
+// ── Agents ────────────────────────────────────────────────────
+async function checkAgents() {
+  const grid = document.getElementById('agent-grid');
+  grid.innerHTML = '<div style="color:var(--text2);font-size:12px">Checking agents…</div>';
+  try {
+    const r = await fetch(`${BASE}/agents/status`);
+    const d = await r.json();
+    const agents = d.agents || {};
+    document.getElementById('ov-agents').textContent = `${d.online_count ?? 0}/4`;
+
+    grid.innerHTML = Object.entries(agents).map(([id, s]) => `
+      <div class="agent-card">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:${AGENT_COLORS[id]}22;font-size:20px">${AGENT_EMOJIS[id]||'🤖'}</div>
+          <div>
+            <div class="agent-name">${id}</div>
+            <div class="agent-role">${AGENT_ROLES[id]||''}</div>
+          </div>
+        </div>
+        <span class="status-pill ${s.healthy ? 'online' : 'offline'}">${s.healthy ? 'Online' : 'Offline'}</span>
+        <div class="agent-stats">
+          <div class="agent-stat"><div class="agent-stat-label">Status</div><div class="agent-stat-value">${s.status||'–'}</div></div>
+          <div class="agent-stat"><div class="agent-stat-label">Port</div><div class="agent-stat-value">${s.endpoint?.split(':').pop()||'–'}</div></div>
+          <div class="agent-stat"><div class="agent-stat-label">Tasks Run</div><div class="agent-stat-value">${s.task_count??0}</div></div>
+          <div class="agent-stat"><div class="agent-stat-label">Errors</div><div class="agent-stat-value" style="color:${s.error_count>0?'var(--red)':'inherit'}">${s.error_count??0}</div></div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text2)">
+          ${s.capabilities?.map(c=>`<span style="background:var(--surface2);border-radius:4px;padding:2px 6px;margin:2px;display:inline-block">${c}</span>`).join('')||''}
+        </div>
+      </div>`).join('');
+
+    if (!d.online_count) addEvent('AGENTS', `All agents offline — checking ports 3001-3004`, 'error');
+    else addEvent('AGENTS', `${d.online_count}/4 agents online`);
+    toast(`Agent check: ${d.online_count}/4 online`, d.online_count > 0 ? 'success' : 'error');
+  } catch(e) {
+    grid.innerHTML = '<div style="color:var(--red);font-size:12px">Failed to reach orchestrator</div>';
+    toast('Cannot reach orchestrator', 'error');
+  }
+}
+
+async function routeTask() {
+  const type = document.getElementById('route-type').value;
+  const desc = document.getElementById('route-desc').value;
+  const result = document.getElementById('route-result');
+  result.className = 'response-box show';
+  result.textContent = 'Routing…';
+  try {
+    const r = await fetch(`${BASE}/tasks/route`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ type, payload: {}, requirements: desc })
+    });
+    const d = await r.json();
+    result.textContent = JSON.stringify(d, null, 2);
+    toast(`Routed to: ${d.assigned_agent} (complexity: ${d.complexity})`, 'success');
+  } catch(e) {
+    result.textContent = `Error: ${e.message}`;
+  }
+}
+
+// ── Terminal ─────────────────────────────────────────────────
+async function runTerminalCmd() {
+  const input = document.getElementById('terminal-input');
+  const cmd = input.value.trim();
+  if (!cmd) return;
+  cmdHistory.unshift(cmd);
+  historyIdx = -1;
+  input.value = '';
+  appendTerminal(`$ ${cmd}`, 'cmd');
+  try {
+    const r = await fetch(`${BASE}/terminal`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ command: cmd, cwd: '/home/runner/workspace' })
+    });
+    const d = await r.json();
+    if (d.stdout) d.stdout.split('\n').filter(Boolean).forEach(l => appendTerminal(l, 'out'));
+    if (d.stderr) d.stderr.split('\n').filter(Boolean).forEach(l => appendTerminal(l, 'err'));
+    if (!d.stdout && !d.stderr) appendTerminal(`(exit ${d.exit_code})`, d.exit_code===0?'info':'err');
+  } catch(e) {
+    appendTerminal(`Error: ${e.message}`, 'err');
+  }
+}
+
+function appendTerminal(text, type = 'out') {
+  const t = document.getElementById('terminal-output');
+  const line = document.createElement('div');
+  line.className = `terminal-line ${type}`;
+  line.textContent = text;
+  t.appendChild(line);
+  t.scrollTop = t.scrollHeight;
+}
+
+function quickCmd(cmd) {
+  document.getElementById('terminal-input').value = cmd;
+  runTerminalCmd();
+}
+
+function clearTerminal() {
+  const t = document.getElementById('terminal-output');
+  t.innerHTML = '<div class="terminal-line info">Terminal cleared</div>';
+}
+
+document.getElementById('terminal-input')?.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowUp') { historyIdx = Math.min(historyIdx+1, cmdHistory.length-1); if(cmdHistory[historyIdx]) e.target.value = cmdHistory[historyIdx]; }
+  if (e.key === 'ArrowDown') { historyIdx = Math.max(historyIdx-1, -1); e.target.value = historyIdx>=0 ? cmdHistory[historyIdx] : ''; }
+});
+
+// ── Files ────────────────────────────────────────────────────
+async function loadFiles() {
+  const path = document.getElementById('file-path-input').value.trim() || 'workspaces';
+  const container = document.getElementById('file-tree-container');
+  container.innerHTML = '<div style="color:var(--text2)">Loading…</div>';
+  try {
+    const r = await fetch(`${BASE}/files?path=${encodeURIComponent(path)}`);
+    const d = await r.json();
+    if (d.error && !d.entries?.length) {
+      container.innerHTML = `<div style="color:var(--red)">${d.error}</div>`;
+      return;
+    }
+    document.getElementById('file-count').textContent = `${d.count} entries in ${d.path}`;
+    if (!d.entries?.length) { container.innerHTML = '<div style="color:var(--text2)">Empty directory</div>'; return; }
+    container.innerHTML = d.entries.map(e => {
+      const indent = (e.path.match(/\//g)||[]).length;
+      const size = e.size ? (e.size > 1024*1024 ? (e.size/1024/1024).toFixed(1)+'MB' : e.size > 1024 ? (e.size/1024).toFixed(1)+'KB' : e.size+'B') : '';
+      return `<div class="file-item ${e.type}" style="padding-left:${8+indent*12}px">
+        ${e.type==='dir' ? '📁' : '📄'} ${e.path.split('/').pop()}
+        <span class="size">${size}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = `<div style="color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
+// ── Upload ───────────────────────────────────────────────────
+async function handleFileUpload(input) {
+  const results = document.getElementById('upload-results');
+  results.innerHTML = '';
+  for (const file of input.files) {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('destination', 'workspaces');
+    try {
+      const r = await fetch(`${BASE}/files/upload`, { method: 'POST', body: form });
+      const d = await r.json();
+      const color = d.success ? 'var(--green)' : 'var(--red)';
+      results.innerHTML += `<div style="font-size:12px;color:${color};margin:4px 0">
+        ${d.success ? '✓' : '✗'} ${file.name} → ${d.path || d.error || 'unknown'}
+      </div>`;
+      if (d.success) { toast(`Uploaded: ${file.name}`, 'success'); addEvent('UPLOAD', `${file.name} → ${d.path}`); }
+    } catch(e) {
+      results.innerHTML += `<div style="font-size:12px;color:var(--red)">✗ ${file.name}: ${e.message}</div>`;
+    }
+  }
+}
+
+// ── Policies ─────────────────────────────────────────────────
+async function loadPolicies() {
+  try {
+    const r = await fetch(`${BASE}/policies`);
+    const d = await r.json();
+    policyData = d.policies || {};
+    const tabs = document.getElementById('policy-tabs');
+    const names = Object.keys(policyData);
+    tabs.innerHTML = names.map(n => `<button class="policy-tab ${n===currentPolicy?'active':''}" onclick="switchPolicy('${n}')">${n}</button>`).join('');
+    switchPolicy(names.includes(currentPolicy) ? currentPolicy : names[0] || 'workflow-policy');
+  } catch(e) {
+    document.getElementById('policy-editor').value = `Error loading policies: ${e.message}`;
+  }
+}
+
+function switchPolicy(name) {
+  currentPolicy = name;
+  document.querySelectorAll('.policy-tab').forEach(t => t.classList.toggle('active', t.textContent === name));
+  document.getElementById('policy-editor').value = JSON.stringify(policyData[name] || {}, null, 2);
+  document.getElementById('policy-status').textContent = `Editing: policies/${name}.json`;
+}
+
+async function savePolicy() {
+  try {
+    const content = JSON.parse(document.getElementById('policy-editor').value);
+    const r = await fetch(`${BASE}/policies`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name: currentPolicy, content })
+    });
+    const d = await r.json();
+    if (d.success) { toast(`Saved: ${currentPolicy}.json`, 'success'); addEvent('POLICY', `Saved ${currentPolicy}`); }
+    else toast('Save failed', 'error');
+  } catch(e) {
+    toast(`Invalid JSON: ${e.message}`, 'error');
+  }
+}
+
+// ── Env ──────────────────────────────────────────────────────
+async function loadEnv() {
+  try {
+    const r = await fetch(`${BASE}/env`);
+    const d = await r.json();
+    const vars = d.variables || {};
+    const container = document.getElementById('env-rows');
+    container.innerHTML = '';
+    Object.entries(vars).forEach(([k, v]) => addEnvRow(k, v));
+    document.getElementById('env-status').textContent = `Loaded from ${d.file} — ${Object.keys(vars).length} variables`;
+    if (Object.keys(vars).length === 0) addEnvRow('', '');
+  } catch(e) {
+    document.getElementById('env-status').textContent = `Error: ${e.message}`;
+  }
+}
+
+function addEnvRow(key = '', val = '') {
+  const container = document.getElementById('env-rows');
+  const row = document.createElement('div');
+  row.className = 'env-row';
+  row.innerHTML = `
+    <input class="env-key" type="text" placeholder="KEY" value="${escHtml(key)}">
+    <input class="env-val" type="text" placeholder="value" value="${escHtml(val)}">
+    <button class="btn btn-danger" style="padding:6px 10px;font-size:12px" onclick="this.parentElement.remove()">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+async function saveEnv() {
+  const rows = document.querySelectorAll('.env-row');
+  const variables = {};
+  rows.forEach(r => {
+    const k = r.querySelector('.env-key').value.trim();
+    const v = r.querySelector('.env-val').value.trim();
+    if (k) variables[k] = v;
+  });
+  try {
+    const r = await fetch(`${BASE}/env`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ variables })
+    });
+    const d = await r.json();
+    if (d.success) { toast(`Saved ${d.variables_set.length} variables to .env`, 'success'); addEvent('ENV', `Saved ${d.variables_set.length} variables`); }
+    else toast('Save failed', 'error');
+  } catch(e) {
+    toast(`Error: ${e.message}`, 'error');
+  }
+}
+
+// ── Event log ─────────────────────────────────────────────────
+function addEvent(type, msg, level = 'info') {
+  const log = document.getElementById('event-log');
+  const time = new Date().toLocaleTimeString();
+  const colors = {info: 'online', error: 'offline', success: 'online', warn: 'busy'};
+  const row = document.createElement('div');
+  row.className = 'event-row';
+  row.innerHTML = `<span class="event-time">${time}</span><span class="event-type"><span class="status-pill ${colors[level]||'online'}">${type}</span></span><span class="event-msg">${escHtml(msg)}</span>`;
+  log.insertBefore(row, log.firstChild);
+  while (log.children.length > 100) log.removeChild(log.lastChild);
+}
+
+function clearEvents() {
+  document.getElementById('event-log').innerHTML = '';
+}
+
+// ── Polling ───────────────────────────────────────────────────
+function startPolling() {
+  if (pollingInterval) return;
+  pollingInterval = setInterval(async () => {
+    await fetchHealth();
+    await loadWorkflows();
+  }, 3000);
+}
+
+// ── Utilities ─────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function refreshAll() {
+  fetchHealth();
+  loadWorkflows();
+  toast('Refreshed', 'info');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+(async () => {
+  // Init agent grid with placeholders
+  const AGENTS = ['openhands','aider','bolt','replit'];
+  document.getElementById('agent-grid').innerHTML = AGENTS.map(id => `
+    <div class="agent-card">
+      <div class="agent-header">
+        <div class="agent-avatar" style="background:${AGENT_COLORS[id]}22">${AGENT_EMOJIS[id]}</div>
+        <div><div class="agent-name">${id}</div><div class="agent-role">${AGENT_ROLES[id]}</div></div>
+      </div>
+      <span class="status-pill offline">Checking…</span>
+    </div>`).join('');
+
+  await fetchHealth();
+  await loadWorkflows();
+  loadWorkflowStepsPreview();
+  addEvent('SYSTEM', 'Dashboard initialized');
+  startPolling();
+})();
+</script>
+</body>
+</html>
