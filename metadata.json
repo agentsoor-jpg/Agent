@@ -1,6 +1,6 @@
 {
-  "name": "AI Engineering OS",
-  "description": "A robust full-stack control center for a hybrid multi-agent software engineering system, featuring intelligent task routing, dependency-resolved task planning, and real-time execution monitoring in a virtual workspace.",
+  "name": "Execution Core",
+  "description": "A lightweight, secure full-stack execution core that implements clean write_file, read_file, create_directory, and run_command capabilities via a single POST endpoint.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

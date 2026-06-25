@@ -1,1 +1,0 @@
-- [AI Engineering OS setup](ai-engineering-os.md) — Python orchestrator on port 8000; port 8080 is taken by Node.js API server. Needs python-multipart for uploads.
