@@ -1,0 +1,62 @@
+name: Agent Ops
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'الفرع الهدف للعمليات (مثال: main)'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: write
+
+jobs:
+  agent-ops:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.inputs.branch }}
+          token: ${{ secrets.AGENT_TOKEN }}
+          submodules: 'false'
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies (if present)
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Optional: Run tests (if tests exist)
+        run: |
+          if [ -f pytest.ini ] || [ -d tests ]; then
+            pytest -q || true
+          fi
+
+      - name: Make example change (safe / optional)
+        run: |
+          # هذه خطوة اختيارية توضح كيفية عمل commit و push.
+          # تعدل/تُنشئ ملفًا بسيطًا لتوثيق وقت تشغيل الـ workflow.
+          # إن لم تكن تريد أي تعديل احذف هذا القسم بالكامل.
+          mkdir -p .github/workflows
+          echo "workflow run at $(date -u)" > .github/workflows/.last_run
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/.last_run
+          git commit -m "chore: update last run timestamp [skip ci]" || echo "No changes to commit"
+
+      - name: Push changes (uses AGENT_TOKEN from secrets)
+        if: success()
+        env:
+          AGENT_TOKEN: ${{ secrets.AGENT_TOKEN }}
+        run: |
+          # تأكد من وضع remote آمن باستخدام التوكن (المتغير مخفي في الـ logs)
+          git remote set-url origin https://x-access-token:${AGENT_TOKEN}@github.com/${{ github.repository }}.git
+          git push origin ${{ github.event.inputs.branch }}

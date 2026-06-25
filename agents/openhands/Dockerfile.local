@@ -1,0 +1,47 @@
+# ============================================================
+# OpenHands Agent - Local Build Method
+# ============================================================
+# Clones and builds OpenHands from the official GitHub repository
+# Use this method if you want to:
+#   - Customize OpenHands source code
+#   - Use a specific version/commit
+#   - Build without relying on pre-built images
+#
+# Source: https://github.com/All-Hands-AI/OpenHands
+# ============================================================
+
+FROM python:3.12-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Clone OpenHands from official GitHub repository
+ARG OPENHANDS_BRANCH=main
+RUN git clone --depth 1 --branch ${OPENHANDS_BRANCH} \
+    https://github.com/All-Hands-AI/OpenHands.git /tmp/openhands
+
+# Install OpenHands from source
+WORKDIR /tmp/openhands
+RUN pip install -e .
+
+# Create working directory for agent
+WORKDIR /app
+
+# Copy any custom configuration or entrypoint scripts if needed
+# COPY ./config /app/config
+
+# Expose the agent API port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:3001/health || exit 1
+
+# Default command - start OpenHands in API mode
+CMD ["python", "-m", "openhands", "--http-server", "--port", "3001"]

@@ -1,0 +1,6 @@
+{
+  "name": "AI Engineering OS",
+  "description": "A robust full-stack control center for a hybrid multi-agent software engineering system, featuring intelligent task routing, dependency-resolved task planning, and real-time execution monitoring in a virtual workspace.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

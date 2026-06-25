@@ -1,0 +1,101 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - APP_ENV=development
+      - WORKSPACE_ROOT=/app/workspace_run
+    volumes:
+      - ./workspace_run:/app/workspace_run
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "orchestrator/app.py"]
+
+  agent-openhands:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - AGENT_NAME=openhands
+      - AGENT_PORT=3001
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "agents/openhands/app.py"]
+
+  agent-aider:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - AGENT_NAME=aider
+      - AGENT_PORT=3002
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "agents/aider/app.py"]
+
+  agent-bolt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - AGENT_NAME=bolt
+      - AGENT_PORT=3003
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "agents/bolt/app.py"]
+
+  agent-replit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - AGENT_NAME=replit
+      - AGENT_PORT=3004
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "agents/replit/app.py"]
+
+volumes:
+  redis-data:
